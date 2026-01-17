@@ -1,57 +1,85 @@
-# 10x Astro Starter
+## SMELT (10x-smelter)
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+![Astro](https://img.shields.io/badge/Astro-5.x-ff5d01?logo=astro&logoColor=white)
+![React](https://img.shields.io/badge/React-19.x-087ea4?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38bdf8?logo=tailwindcss&logoColor=white)
+![Node](https://img.shields.io/badge/Node-22.14.0-339933?logo=node.js&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-## Tech Stack
+## Project description
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+SMELT is a single-page web app that transforms messy notes into clean, structured **Markdown documents**. It’s built for quick “drop-and-go” processing of meeting/lecture/interview recordings, with an option to paste text directly.
 
-## Prerequisites
+- **Primary use case**: upload audio → transcribe → synthesize into structured Markdown via a selected prompt
+- **Also supports**: direct text input (no transcription stage)
+- **Privacy-first MVP**: no permanent server-side file storage (temporary storage only when needed for conversion, then immediate cleanup)
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+> Note: This `10x-smelter` package is an Astro + React scaffold for the SMELT product. The existing one-page app you want to refine lives in `chaos-smelter/`.
 
-## Getting Started
+## Table of contents
 
-1. Clone the repository:
+- [Project description](#project-description)
+- [Tech stack](#tech-stack)
+- [Getting started locally](#getting-started-locally)
+- [Available scripts](#available-scripts)
+- [Project structure](#project-structure)
+- [Project scope](#project-scope)
+- [Project status](#project-status)
+- [License](#license)
+
+## Tech stack
+
+### Frontend (this package)
+
+- **Astro 5**: fast app shell + pages
+- **React 19**: interactive UI components
+- **TypeScript 5**
+- **Tailwind CSS 4**
+- **shadcn/ui foundation** (Radix primitives + utility libs like `clsx`, `tailwind-merge`, `class-variance-authority`)
+
+### Target architecture (from the product docs)
+
+- **Backend/BaaS**: Supabase (Postgres, Auth, Realtime/WebSockets)
+- **AI**: OpenRouter.ai for LLM communication
+- **Audio**: FFmpeg for format conversion (e.g. m4a → mp3) with temporary storage and immediate cleanup
+- **State management**: Zustand (planned)
+- **Deployment**: Docker image containing Node runtime + Astro production build + FFmpeg
+
+## Getting started locally
+
+### Prerequisites
+
+- **Node.js**: `22.14.0` (pinned in `.nvmrc`)
+- **npm**: included with Node
+
+### Install & run
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Run the development server:
-
-```bash
+cd 10x-smelter
+nvm use
+npm ci
 npm run dev
 ```
 
-4. Build for production:
+Then open the URL printed by Astro in your terminal.
 
-```bash
-npm run build
-```
+## Available scripts
 
-## Available Scripts
+From `package.json`:
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+- **`npm run dev`**: start Astro dev server
+- **`npm run build`**: production build
+- **`npm run preview`**: preview the production build locally
+- **`npm run lint`**: run ESLint
+- **`npm run lint:fix`**: run ESLint with auto-fixes
+- **`npm run format`**: run Prettier
 
-## Project Structure
+## Project structure
 
-```md
+This project inherits the starter layout from the Astro starter:
+
+```text
 .
 ├── src/
 │   ├── layouts/    # Astro layouts
@@ -62,33 +90,61 @@ npm run build
 ├── public/         # Public assets
 ```
 
-## AI Development Support
+## Project scope
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+This section summarizes the MVP scope from `10x-smelter/.ai/prd.md`.
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+### In scope (MVP)
 
-### Cursor IDE
+- **Inputs**
+  - Audio upload (drag & drop or browse): **.mp3, .wav, .m4a**
+  - Text paste/type input
+  - Mutual exclusivity: selecting files clears text input and vice versa
+- **File constraints**
+  - Max **25MB per file**
+  - Max **30 minutes** audio duration (MVP constraint)
+  - Max **5 files** at once
+  - Server-side conversion for formats needing it (e.g. m4a), with temporary storage and immediate cleanup
+- **Processing modes**
+  - **Separate mode**: process each file individually (available to all; anonymous users can only use this mode)
+  - **Combine mode**: logged-in only; 2+ files; transcribe in parallel, concatenate transcripts with file-name headers, then apply the prompt once
+- **Prompt system**
+  - **5 predefined prompts** available to all users
+  - **Custom prompts** for logged-in users (CRUD)
+    - Max **4,000 characters**
+    - Import from `.md` (reject files > 10KB / over limit)
+    - Divisors/sections for organization (visual)
+- **Usage limits**
+  - Anonymous: **1 smelt per day** (tracked by IP), resets at **midnight UTC**
+  - Logged-in: **5 smelts per week**, resets **Monday midnight UTC**
+  - Power users: bring-your-own OpenAI key → **UNLIMITED**
+  - Credit rules:
+    - **1 credit per successful operation** (regardless of mode or file count)
+    - Failed attempts **do not** consume credits
+- **Progress & results**
+  - Real-time progress via WebSockets (percent + stage)
+  - Results are ephemeral (refresh clears)
+  - Export: **copy to clipboard** + **download `.md`**
+- **Error handling**
+  - Clear, actionable messages in a direct “neobrutalist” tone (often all caps)
+  - Examples:
+    - “FILE TOO CHUNKY. MAX 25MB.”
+    - “DAILY LIMIT HIT. SIGN UP FOR 5/WEEK OR ADD YOUR API KEY FOR UNLIMITED.”
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+### Out of scope (MVP)
 
-### GitHub Copilot
+- Payments/subscriptions
+- Results history/projects
+- More file types (PDF/images/video), exports beyond Markdown (PDF/DOCX)
+- Advanced prompt/model parameters (temperature/model selection)
+- Analytics-heavy features (token/cost breakdowns), scheduling, batch automation
 
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
+## Project status
 
-### Windsurf
-
-The `.windsurfrules` file contains AI configuration for Windsurf.
-
-## Contributing
-
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+- **Status**: early-stage scaffold/prototype for SMELT’s Astro + React UI.
+- **Source of truth for product requirements**: `10x-smelter/.ai/prd.md`
+- **Main app to refine**: `chaos-smelter/` (per your note)
 
 ## License
 
-MIT
+MIT — see `LICENSE`.
