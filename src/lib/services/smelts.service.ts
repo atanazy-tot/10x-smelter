@@ -18,6 +18,7 @@ import {
   SmeltPromptNotFoundError,
 } from "@/lib/utils/smelt-errors";
 import { MAX_FILES } from "@/lib/schemas/smelts.schema";
+import { processSmelt } from "@/lib/realtime/processing.service";
 
 // =============================================================================
 // CREATE SMELT
@@ -110,8 +111,10 @@ export async function createSmelt(
     // Deduct credit (for users without valid API key)
     await deductCredit(supabase, userId);
 
-    // TODO: Trigger async processing
-    // await queueSmeltProcessing(smelt.id, files, input.text);
+    // Fire-and-forget: start processing in background
+    processSmelt(supabase, smelt.id).catch((error) => {
+      console.error("Background processing error for smelt:", smelt.id, error);
+    });
 
     return {
       id: smelt.id,
@@ -349,6 +352,11 @@ async function createAnonymousSmelt(
     created_at: string;
     subscription_channel: string;
   };
+
+  // Fire-and-forget: start processing in background
+  processSmelt(supabase, result.id).catch((error) => {
+    console.error("Background processing error for anonymous smelt:", result.id, error);
+  });
 
   return {
     id: result.id,
