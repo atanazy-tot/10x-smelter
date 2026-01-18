@@ -1,5 +1,5 @@
-import { createHash } from "crypto";
 import type { SupabaseClient } from "@/db/supabase.client";
+import { hashIp } from "@/lib/utils/hash";
 import type { AuthResponseDTO, SessionAuthenticatedDTO, SessionAnonymousDTO, SessionDTO } from "@/types";
 import {
   AppError,
@@ -152,6 +152,3 @@ async function getAnonymousSession(supabase: SupabaseClient, clientIp: string): 
   };
 }
 
-function hashIp(ip: string): string {
-  return createHash("sha256").update(ip).digest("hex");
-}
