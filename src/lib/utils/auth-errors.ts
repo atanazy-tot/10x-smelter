@@ -1,36 +1,63 @@
-export interface ApiError {
-  status: number;
-  code: string;
-  message: string;
-}
+/**
+ * Authentication-specific error classes.
+ * These are thrown by auth services and converted to responses in endpoints.
+ */
 
-export function mapSupabaseAuthError(error: unknown): ApiError {
-  if (error instanceof Error) {
-    const msg = error.message.toLowerCase();
+import { AppError } from "./errors";
 
-    if (msg.includes("already registered") || msg.includes("user already registered")) {
-      return { status: 409, code: "email_exists", message: "EMAIL ALREADY REGISTERED" };
-    }
-    if (msg.includes("invalid login") || msg.includes("invalid credentials")) {
-      return { status: 401, code: "invalid_credentials", message: "WRONG EMAIL OR PASSWORD" };
-    }
-    if (msg.includes("rate limit")) {
-      return { status: 429, code: "rate_limited", message: "TOO MANY ATTEMPTS. TRY AGAIN LATER" };
-    }
+/**
+ * Email already registered error.
+ * Thrown when attempting to register with an existing email.
+ */
+export class EmailExistsError extends AppError {
+  readonly status = 409;
+  readonly code = "email_exists";
+
+  constructor() {
+    super("EMAIL ALREADY REGISTERED");
   }
-  return { status: 500, code: "internal_error", message: "SOMETHING WENT WRONG. TRY AGAIN" };
 }
 
-export function errorResponse(error: ApiError): Response {
-  return new Response(JSON.stringify({ error: { code: error.code, message: error.message } }), {
-    status: error.status,
-    headers: { "Content-Type": "application/json" },
-  });
+/**
+ * Invalid credentials error.
+ * Thrown when login fails due to wrong email or password.
+ */
+export class InvalidCredentialsError extends AppError {
+  readonly status = 401;
+  readonly code = "invalid_credentials";
+
+  constructor() {
+    super("WRONG EMAIL OR PASSWORD");
+  }
 }
 
-export function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
+/**
+ * Rate limited error.
+ * Thrown when too many requests have been made.
+ */
+export class RateLimitedError extends AppError {
+  readonly status = 429;
+  readonly code = "rate_limited";
+
+  constructor() {
+    super("TOO MANY ATTEMPTS. TRY AGAIN LATER");
+  }
 }
+
+/**
+ * Validation error for request input.
+ * Thrown when request body fails schema validation.
+ */
+export class ValidationError extends AppError {
+  readonly status = 400;
+
+  constructor(
+    readonly code: string,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+// Re-export base utilities for convenient imports
+export { AppError, InternalError, NotFoundError, UnauthorizedError, jsonResponse, toAppError } from "./errors";

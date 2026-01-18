@@ -1,46 +1,87 @@
 import { createHash } from "crypto";
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { AuthResponseDTO, SessionAuthenticatedDTO, SessionAnonymousDTO, SessionDTO } from "@/types";
+import {
+  AppError,
+  EmailExistsError,
+  InvalidCredentialsError,
+  RateLimitedError,
+  InternalError,
+} from "@/lib/utils/auth-errors";
 
 export async function register(supabase: SupabaseClient, email: string, password: string): Promise<AuthResponseDTO> {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  try {
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
-  if (error) throw error;
-  if (!data.user || !data.session || !data.user.email || !data.session.expires_at) {
-    throw new Error("Registration failed");
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already registered") || msg.includes("user already registered")) {
+        throw new EmailExistsError();
+      }
+      if (msg.includes("rate limit")) throw new RateLimitedError();
+      throw error;
+    }
+
+    if (!data.user || !data.session || !data.user.email || !data.session.expires_at) {
+      throw new InternalError();
+    }
+
+    return {
+      user: { id: data.user.id, email: data.user.email },
+      session: {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at,
+      },
+    };
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    console.error("Registration error:", error);
+    throw new InternalError();
   }
-
-  return {
-    user: { id: data.user.id, email: data.user.email },
-    session: {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at,
-    },
-  };
 }
 
 export async function login(supabase: SupabaseClient, email: string, password: string): Promise<AuthResponseDTO> {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) throw error;
-  if (!data.user.email || !data.session.expires_at) {
-    throw new Error("Login failed");
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("invalid login") || msg.includes("invalid credentials")) {
+        throw new InvalidCredentialsError();
+      }
+      if (msg.includes("rate limit")) throw new RateLimitedError();
+      throw error;
+    }
+
+    if (!data.user.email || !data.session.expires_at) {
+      throw new InternalError();
+    }
+
+    return {
+      user: { id: data.user.id, email: data.user.email },
+      session: {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at,
+      },
+    };
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    console.error("Login error:", error);
+    throw new InternalError();
   }
-
-  return {
-    user: { id: data.user.id, email: data.user.email },
-    session: {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at,
-    },
-  };
 }
 
 export async function logout(supabase: SupabaseClient): Promise<void> {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    console.error("Logout error:", error);
+    throw new InternalError();
+  }
 }
 
 export async function getSession(
@@ -48,14 +89,20 @@ export async function getSession(
   clientIp: string,
   accessToken?: string | null
 ): Promise<SessionDTO> {
-  const {
-    data: { user },
-  } = accessToken ? await supabase.auth.getUser(accessToken) : await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+    } = accessToken ? await supabase.auth.getUser(accessToken) : await supabase.auth.getUser();
 
-  if (user && user.email) {
-    return getAuthenticatedSession(supabase, user.id, user.email);
+    if (user && user.email) {
+      return getAuthenticatedSession(supabase, user.id, user.email);
+    }
+    return getAnonymousSession(supabase, clientIp);
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    console.error("Session error:", error);
+    throw new InternalError();
   }
-  return getAnonymousSession(supabase, clientIp);
 }
 
 async function getAuthenticatedSession(
@@ -87,7 +134,6 @@ async function getAuthenticatedSession(
 async function getAnonymousSession(supabase: SupabaseClient, clientIp: string): Promise<SessionAnonymousDTO> {
   const ipHash = hashIp(clientIp);
 
-  // Use RPC to call security definer function
   const { data, error } = await supabase.rpc("get_anonymous_usage", { ip_hash_param: ipHash });
 
   if (error) throw error;
