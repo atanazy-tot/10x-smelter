@@ -8,7 +8,9 @@ export async function POST(context: APIContext) {
   try {
     const {
       data: { user },
-    } = await context.locals.supabase.auth.getUser();
+    } = context.locals.accessToken
+      ? await context.locals.supabase.auth.getUser(context.locals.accessToken)
+      : await context.locals.supabase.auth.getUser();
 
     if (!user) throw new UnauthorizedError("NOT LOGGED IN");
 

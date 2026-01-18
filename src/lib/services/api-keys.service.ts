@@ -63,20 +63,20 @@ export async function getApiKeyStatus(supabase: SupabaseClient, userId: string):
       .from("user_api_keys")
       .select("user_id")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     const { data: profile, error } = await supabase
       .from("user_profiles")
       .select("api_key_status, api_key_validated_at")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
     return {
       has_key: !!keyData,
-      status: profile.api_key_status,
-      validated_at: profile.api_key_validated_at,
+      status: profile?.api_key_status ?? "none",
+      validated_at: profile?.api_key_validated_at ?? null,
     };
   } catch (error) {
     if (error instanceof AppError) throw error;
@@ -91,13 +91,13 @@ export async function getApiKeyStatus(supabase: SupabaseClient, userId: string):
  */
 export async function deleteApiKey(supabase: SupabaseClient, userId: string): Promise<ApiKeyDeleteResponseDTO> {
   try {
-    const { data: keyData, error: checkError } = await supabase
+    const { data: keyData } = await supabase
       .from("user_api_keys")
       .select("user_id")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (checkError || !keyData) throw new NoApiKeyError();
+    if (!keyData) throw new NoApiKeyError();
 
     const { error: deleteError } = await supabase.from("user_api_keys").delete().eq("user_id", userId);
 
@@ -117,9 +117,9 @@ export async function deleteApiKey(supabase: SupabaseClient, userId: string): Pr
       .from("user_profiles")
       .select("credits_remaining, credits_reset_at")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (fetchError) throw fetchError;
+    if (fetchError || !profile) throw new InternalError();
 
     return {
       message: "API KEY REMOVED",
