@@ -631,7 +631,4 @@ export interface SmeltFailedEventDTO {
  * Union type for all real-time events
  * Events received on subscription channel "smelt:{smelt_id}"
  */
-export type SmeltRealtimeEventDTO =
-  | SmeltProgressEventDTO
-  | SmeltCompletedEventDTO
-  | SmeltFailedEventDTO;
+export type SmeltRealtimeEventDTO = SmeltProgressEventDTO | SmeltCompletedEventDTO | SmeltFailedEventDTO;

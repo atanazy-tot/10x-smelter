@@ -1,8 +1,27 @@
 import { defineMiddleware } from "astro:middleware";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/db/database.types";
 
-import { supabaseClient } from "../db/supabase.client.ts";
+export const onRequest = defineMiddleware(async (context, next) => {
+  // Create per-request client (not shared singleton)
+  const supabase = createClient<Database>(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 
-export const onRequest = defineMiddleware((context, next) => {
-  context.locals.supabase = supabaseClient;
+  // Extract and set session from Authorization header
+  const authHeader = context.request.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: "",
+    });
+  }
+
+  context.locals.supabase = supabase;
+
   return next();
 });
