@@ -55,12 +55,7 @@ export async function PATCH(context: APIContext) {
       throw new PromptValidationError(code, message);
     }
 
-    const result = await updatePrompt(
-      context.locals.supabase,
-      user.id,
-      paramValidation.data.id,
-      validation.data
-    );
+    const result = await updatePrompt(context.locals.supabase, user.id, paramValidation.data.id, validation.data);
 
     return jsonResponse(result);
   } catch (error) {

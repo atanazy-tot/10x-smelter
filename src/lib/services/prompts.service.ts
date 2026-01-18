@@ -47,11 +47,7 @@ function toPromptDTO(row: {
 /**
  * Gets the next position for a prompt in a section.
  */
-async function getNextPosition(
-  supabase: SupabaseClient,
-  userId: string,
-  sectionId: string | null
-): Promise<number> {
+async function getNextPosition(supabase: SupabaseClient, userId: string, sectionId: string | null): Promise<number> {
   let query = supabase.from("prompts").select("position").eq("user_id", userId);
 
   if (sectionId === null) {
@@ -68,11 +64,7 @@ async function getNextPosition(
 /**
  * Verifies that a section exists and belongs to the user.
  */
-async function verifySectionOwnership(
-  supabase: SupabaseClient,
-  userId: string,
-  sectionId: string
-): Promise<void> {
+async function verifySectionOwnership(supabase: SupabaseClient, userId: string, sectionId: string): Promise<void> {
   const { data, error } = await supabase
     .from("prompt_sections")
     .select("id")
@@ -96,10 +88,7 @@ export async function listPrompts(
     const { section_id, sort, order, page, limit } = query;
     const offset = (page - 1) * limit;
 
-    let queryBuilder = supabase
-      .from("prompts")
-      .select("*", { count: "exact" })
-      .eq("user_id", userId);
+    let queryBuilder = supabase.from("prompts").select("*", { count: "exact" }).eq("user_id", userId);
 
     // Filter by section if specified
     if (section_id !== undefined) {
@@ -134,11 +123,7 @@ export async function listPrompts(
 /**
  * Gets a single prompt by ID.
  */
-export async function getPrompt(
-  supabase: SupabaseClient,
-  userId: string,
-  promptId: string
-): Promise<PromptDTO> {
+export async function getPrompt(supabase: SupabaseClient, userId: string, promptId: string): Promise<PromptDTO> {
   try {
     const { data, error } = await supabase
       .from("prompts")
@@ -230,12 +215,7 @@ export async function updatePrompt(
     if (input.section_id !== undefined) updateData.section_id = input.section_id;
     if (input.position !== undefined) updateData.position = input.position;
 
-    const { data, error } = await supabase
-      .from("prompts")
-      .update(updateData)
-      .eq("id", promptId)
-      .select()
-      .single();
+    const { data, error } = await supabase.from("prompts").update(updateData).eq("id", promptId).select().single();
 
     if (error) throw error;
 
@@ -336,11 +316,7 @@ export async function reorderPrompts(
     const promptIds = order.map((item) => item.id);
 
     // Verify all prompts exist, belong to user, and are in the specified section
-    let queryBuilder = supabase
-      .from("prompts")
-      .select("id")
-      .eq("user_id", userId)
-      .in("id", promptIds);
+    let queryBuilder = supabase.from("prompts").select("id").eq("user_id", userId).in("id", promptIds);
 
     if (section_id === null) {
       queryBuilder = queryBuilder.is("section_id", null);

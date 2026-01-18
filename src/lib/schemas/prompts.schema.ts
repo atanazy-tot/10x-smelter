@@ -67,9 +67,7 @@ export const reorderItemSchema = z.object({
  * Request body for reordering prompts within a section.
  */
 export const promptsReorderSchema = z.object({
-  section_id: z
-    .union([z.string().uuid(), z.null()])
-    .describe("Section to reorder within (null for unsectioned)"),
+  section_id: z.union([z.string().uuid(), z.null()]).describe("Section to reorder within (null for unsectioned)"),
   order: z.array(reorderItemSchema).min(1, "INVALID ORDER DATA"),
 });
 

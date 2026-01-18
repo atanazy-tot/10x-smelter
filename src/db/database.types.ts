@@ -282,6 +282,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_anonymous_smelt: {
+        Args: {
+          p_default_prompt_names: Database["public"]["Enums"]["default_prompt_name"][]
+          p_files: Json
+          p_mode: Database["public"]["Enums"]["smelt_mode"]
+        }
+        Returns: Json
+      }
+      deduct_smelt_credit: { Args: { p_user_id: string }; Returns: undefined }
       get_anonymous_usage: { Args: { ip_hash_param: string }; Returns: number }
       get_profile_with_reset: {
         Args: { p_user_id: string }
@@ -302,8 +311,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      increment_anonymous_usage: {
+        Args: { p_ip_hash: string }
+        Returns: undefined
+      }
       reorder_prompts: {
-        Args: { p_section_id: string | null; p_updates: Json; p_user_id: string }
+        Args: { p_section_id: string; p_updates: Json; p_user_id: string }
         Returns: number
       }
       reorder_sections: {
