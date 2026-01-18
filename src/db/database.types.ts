@@ -302,6 +302,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reorder_prompts: {
+        Args: { p_section_id: string | null; p_updates: Json; p_user_id: string }
+        Returns: number
+      }
       reorder_sections: {
         Args: { p_updates: Json; p_user_id: string }
         Returns: number
