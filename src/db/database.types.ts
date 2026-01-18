@@ -259,7 +259,25 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      get_anonymous_usage: {
+        Args: { ip_hash_param: string };
+        Returns: number;
+      };
+      get_profile_with_reset: {
+        Args: { p_user_id: string };
+        Returns: {
+          user_id: string;
+          credits_remaining: number;
+          weekly_credits_max: number;
+          credits_reset_at: string;
+          api_key_status: Database["public"]["Enums"]["api_key_status"];
+          api_key_validated_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+      };
+    };
     Enums: {
       api_key_status: "none" | "pending" | "valid" | "invalid";
       default_prompt_name: "summarize" | "action_items" | "detailed_notes" | "qa_format" | "table_of_contents";

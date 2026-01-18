@@ -11,7 +11,7 @@ export async function GET(context: APIContext) {
       context.request.headers.get("x-real-ip") ??
       "unknown";
 
-    const session = await getSession(context.locals.supabase, clientIp);
+    const session = await getSession(context.locals.supabase, clientIp, context.locals.accessToken);
 
     return jsonResponse(session);
   } catch {

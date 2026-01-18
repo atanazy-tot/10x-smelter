@@ -43,10 +43,14 @@ export async function logout(supabase: SupabaseClient): Promise<void> {
   if (error) throw error;
 }
 
-export async function getSession(supabase: SupabaseClient, clientIp: string): Promise<SessionDTO> {
+export async function getSession(
+  supabase: SupabaseClient,
+  clientIp: string,
+  accessToken?: string | null
+): Promise<SessionDTO> {
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = accessToken ? await supabase.auth.getUser(accessToken) : await supabase.auth.getUser();
 
   if (user && user.email) {
     return getAuthenticatedSession(supabase, user.id, user.email);
