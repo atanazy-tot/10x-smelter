@@ -4,8 +4,8 @@ import type { SupabaseClient } from "@/db/supabase.client";
 import type { UsageDTO, UsageAnonymousDTO, UsageAuthenticatedDTO, UsageUnlimitedDTO } from "@/types";
 import { hashIp } from "@/lib/utils/hash";
 import { InternalError } from "@/lib/utils/errors";
-
-const ANONYMOUS_DAILY_LIMIT = 1;
+import { SmeltDailyLimitError, SmeltWeeklyLimitError } from "@/lib/utils/smelt-errors";
+import { ANONYMOUS_DAILY_LIMIT } from "@/lib/constants";
 
 /**
  * Creates a clean Supabase client without auth headers for anonymous requests.
@@ -27,11 +27,7 @@ function createAnonymousClient(): SupabaseClient {
  * @param clientIp - Client IP address for anonymous user tracking
  * @returns Usage DTO based on user type
  */
-export async function getUsage(
-  supabase: SupabaseClient,
-  userId: string | null,
-  clientIp: string
-): Promise<UsageDTO> {
+export async function getUsage(supabase: SupabaseClient, userId: string | null, clientIp: string): Promise<UsageDTO> {
   if (!userId) {
     // Use a clean client for anonymous requests to avoid issues with invalid tokens
     const anonymousClient = createAnonymousClient();
@@ -120,4 +116,59 @@ function getTomorrowMidnightUtc(): Date {
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
   tomorrow.setUTCHours(0, 0, 0, 0);
   return tomorrow;
+}
+
+/**
+ * Checks usage limits and throws an error if limits are exceeded.
+ * - Anonymous: 1 smelt/day (tracked by IP hash)
+ * - Authenticated without API key: Weekly credits
+ * - Authenticated with valid API key: Unlimited
+ *
+ * @param supabase - Supabase client instance
+ * @param userId - User ID or null for anonymous users
+ * @param clientIp - Client IP address for anonymous user tracking
+ * @throws SmeltDailyLimitError if anonymous user has hit daily limit
+ * @throws SmeltWeeklyLimitError if authenticated user has no credits remaining
+ */
+export async function checkUsageLimits(
+  supabase: SupabaseClient,
+  userId: string | null,
+  clientIp: string
+): Promise<void> {
+  if (!userId) {
+    // Anonymous: check daily limit via RPC
+    const ipHash = hashIp(clientIp);
+    const { data: smeltsUsed } = await supabase.rpc("get_anonymous_usage", {
+      ip_hash_param: ipHash,
+    });
+
+    if ((smeltsUsed ?? 0) >= ANONYMOUS_DAILY_LIMIT) {
+      throw new SmeltDailyLimitError();
+    }
+    return;
+  }
+
+  // Authenticated: check profile with credit reset via RPC
+  const { data: profile, error } = await supabase.rpc("get_profile_with_reset", {
+    p_user_id: userId,
+  });
+
+  if (error || !profile) {
+    throw new InternalError();
+  }
+
+  // Unlimited if valid API key
+  if (profile.api_key_status === "valid") {
+    return;
+  }
+
+  // Check credits
+  if (profile.credits_remaining <= 0) {
+    const used = profile.weekly_credits_max;
+    const max = profile.weekly_credits_max;
+    const daysUntilReset = Math.ceil(
+      (new Date(profile.credits_reset_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
+    throw new SmeltWeeklyLimitError(used, max, daysUntilReset);
+  }
 }

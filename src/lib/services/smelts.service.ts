@@ -6,19 +6,18 @@
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { SmeltCreateResponseDTO, SmeltDTO, SmeltsListDTO, SmeltFileDTO, SmeltStatus } from "@/types";
 import type { SmeltCreateInput, ListSmeltsQuery } from "@/lib/schemas/smelts.schema";
-import { createHash } from "crypto";
 import {
   AppError,
   InternalError,
   UnauthorizedError,
   SmeltValidationError,
-  SmeltDailyLimitError,
-  SmeltWeeklyLimitError,
   SmeltNotFoundError,
   SmeltPromptNotFoundError,
 } from "@/lib/utils/smelt-errors";
 import { MAX_FILES } from "@/lib/schemas/smelts.schema";
 import { processSmelt } from "@/lib/realtime/processing.service";
+import { checkUsageLimits } from "@/lib/services/usage.service";
+import { hashIp } from "@/lib/utils/hash";
 
 // =============================================================================
 // CREATE SMELT
@@ -48,9 +47,6 @@ export async function createSmelt(
     // Validate input combination
     if (!hasFiles && !hasText) {
       throw new SmeltValidationError("no_input", "NOTHING TO PROCESS. UPLOAD A FILE OR ENTER TEXT");
-    }
-    if (hasFiles && hasText) {
-      throw new SmeltValidationError("mixed_input", "CHOOSE EITHER FILES OR TEXT, NOT BOTH");
     }
     if (hasFiles && files.length > MAX_FILES) {
       throw new SmeltValidationError("too_many_files", "MAX 5 FILES ALLOWED");
@@ -253,51 +249,6 @@ export async function listSmelts(
 // =============================================================================
 
 /**
- * Checks usage limits based on user type.
- * - Anonymous: 1 smelt/day (tracked by IP hash)
- * - Authenticated without API key: Weekly credits
- * - Authenticated with valid API key: Unlimited
- */
-async function checkUsageLimits(supabase: SupabaseClient, userId: string | null, clientIp: string): Promise<void> {
-  if (!userId) {
-    // Anonymous: check daily limit via RPC
-    const ipHash = createHash("sha256").update(clientIp).digest("hex");
-    const { data: smeltsUsed } = await supabase.rpc("get_anonymous_usage", {
-      ip_hash_param: ipHash,
-    });
-
-    if ((smeltsUsed ?? 0) >= 1) {
-      throw new SmeltDailyLimitError();
-    }
-    return;
-  }
-
-  // Authenticated: check profile with credit reset via RPC
-  const { data: profile, error } = await supabase.rpc("get_profile_with_reset", {
-    p_user_id: userId,
-  });
-
-  if (error || !profile) {
-    throw new InternalError();
-  }
-
-  // Unlimited if valid API key
-  if (profile.api_key_status === "valid") {
-    return;
-  }
-
-  // Check credits
-  if (profile.credits_remaining <= 0) {
-    const used = profile.weekly_credits_max;
-    const max = profile.weekly_credits_max;
-    const daysUntilReset = Math.ceil(
-      (new Date(profile.credits_reset_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
-    throw new SmeltWeeklyLimitError(used, max, daysUntilReset);
-  }
-}
-
-/**
  * Creates a smelt for anonymous users using SECURITY DEFINER RPC.
  * This bypasses RLS since anonymous users can't SELECT from smelts.
  */
@@ -307,18 +258,20 @@ async function createAnonymousSmelt(
   input: SmeltCreateInput,
   clientIp: string
 ): Promise<SmeltCreateResponseDTO> {
-  // Build file metadata array for the RPC
-  const fileMetadata: Array<{ filename: string; size_bytes: number; input_type: string }> = [];
+  // Build file metadata array for the RPC (both audio files AND text are allowed)
+  const fileMetadata: { filename: string; size_bytes: number; input_type: string }[] = [];
 
-  if (files.length > 0) {
-    for (const file of files) {
-      fileMetadata.push({
-        filename: file.name,
-        size_bytes: file.size,
-        input_type: "audio",
-      });
-    }
-  } else if (input.text) {
+  // Add audio files first
+  for (const file of files) {
+    fileMetadata.push({
+      filename: file.name,
+      size_bytes: file.size,
+      input_type: "audio",
+    });
+  }
+
+  // Add text input after audio files (if provided)
+  if (input.text) {
     fileMetadata.push({
       filename: "text-input.txt",
       size_bytes: new TextEncoder().encode(input.text).length,
@@ -390,7 +343,7 @@ async function deductCredit(supabase: SupabaseClient, userId: string): Promise<v
  * Uses RPC with SECURITY DEFINER to bypass RLS.
  */
 async function recordAnonymousUsage(supabase: SupabaseClient, clientIp: string): Promise<void> {
-  const ipHash = createHash("sha256").update(clientIp).digest("hex");
+  const ipHash = hashIp(clientIp);
 
   const { error } = await supabase.rpc("increment_anonymous_usage", {
     p_ip_hash: ipHash,
@@ -414,7 +367,8 @@ async function verifyPromptOwnership(supabase: SupabaseClient, userId: string, p
 }
 
 /**
- * Creates smelt_files records for audio files or text input.
+ * Creates smelt_files records for audio files and/or text input.
+ * Audio files get positions 0, 1, 2..., text input gets position after all audio files.
  */
 async function createSmeltFiles(
   supabase: SupabaseClient,
@@ -423,29 +377,30 @@ async function createSmeltFiles(
   text?: string
 ): Promise<SmeltFileDTO[]> {
   const smeltFiles: SmeltFileDTO[] = [];
+  let position = 0;
 
-  if (files.length > 0) {
-    // Audio files
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const { data, error } = await supabase
-        .from("smelt_files")
-        .insert({
-          smelt_id: smeltId,
-          input_type: "audio",
-          filename: file.name,
-          size_bytes: file.size,
-          status: "pending",
-          position: i,
-        })
-        .select()
-        .single();
+  // Add audio files first
+  for (const file of files) {
+    const { data, error } = await supabase
+      .from("smelt_files")
+      .insert({
+        smelt_id: smeltId,
+        input_type: "audio",
+        filename: file.name,
+        size_bytes: file.size,
+        status: "pending",
+        position,
+      })
+      .select()
+      .single();
 
-      if (error) throw error;
-      smeltFiles.push(toSmeltFileDTO(data));
-    }
-  } else if (text) {
-    // Text input
+    if (error) throw error;
+    smeltFiles.push(toSmeltFileDTO(data));
+    position++;
+  }
+
+  // Add text input after audio files (if provided)
+  if (text) {
     const { data, error } = await supabase
       .from("smelt_files")
       .insert({
@@ -454,7 +409,7 @@ async function createSmeltFiles(
         filename: "text-input.txt",
         size_bytes: new TextEncoder().encode(text).length,
         status: "pending",
-        position: 0,
+        position,
       })
       .select()
       .single();

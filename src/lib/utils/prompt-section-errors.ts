@@ -8,17 +8,8 @@ import { AppError } from "./errors";
 // Re-export base utilities for convenient imports
 export { AppError, InternalError, UnauthorizedError, jsonResponse, toAppError } from "./errors";
 
-/**
- * Error when a requested section does not exist or doesn't belong to the user.
- */
-export class SectionNotFoundError extends AppError {
-  readonly status = 404;
-  readonly code = "not_found";
-
-  constructor(message = "SECTION NOT FOUND") {
-    super(message);
-  }
-}
+// Re-export shared errors from prompt-errors.ts to avoid duplication
+export { SectionNotFoundError, InvalidOrderDataError } from "./prompt-errors";
 
 /**
  * Error when update request contains no valid fields.
@@ -28,18 +19,6 @@ export class InvalidUpdateDataError extends AppError {
   readonly code = "invalid_data";
 
   constructor(message = "INVALID UPDATE DATA") {
-    super(message);
-  }
-}
-
-/**
- * Error when reorder request contains invalid order data.
- */
-export class InvalidOrderDataError extends AppError {
-  readonly status = 400;
-  readonly code = "invalid_order";
-
-  constructor(message = "INVALID ORDER DATA") {
     super(message);
   }
 }

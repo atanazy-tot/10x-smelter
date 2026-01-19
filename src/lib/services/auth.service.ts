@@ -8,6 +8,7 @@ import {
   RateLimitedError,
   InternalError,
 } from "@/lib/utils/auth-errors";
+import { ANONYMOUS_DAILY_LIMIT } from "@/lib/constants";
 
 export async function register(supabase: SupabaseClient, email: string, password: string): Promise<AuthResponseDTO> {
   try {
@@ -146,9 +147,8 @@ async function getAnonymousSession(supabase: SupabaseClient, clientIp: string): 
     authenticated: false,
     anonymous_usage: {
       smelts_used_today: data ?? 0,
-      daily_limit: 1,
+      daily_limit: ANONYMOUS_DAILY_LIMIT,
       resets_at: tomorrow.toISOString(),
     },
   };
 }
-
