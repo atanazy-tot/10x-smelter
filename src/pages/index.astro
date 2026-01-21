@@ -1,8 +1,10 @@
 ---
-import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+import { MainProcessingIsland } from "../components/main/MainProcessingIsland";
+
+export const prerender = false;
 ---
 
-<Layout>
-  <Welcome />
+<Layout title="SMELT - Audio to Markdown">
+  <MainProcessingIsland client:load />
 </Layout>

@@ -4,11 +4,7 @@
  */
 
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  SmeltProgressEventPayloadDTO,
-  SmeltCompletedEventPayloadDTO,
-  SmeltFailedEventPayloadDTO,
-} from "@/types";
+import type { SmeltProgressEventPayloadDTO, SmeltCompletedEventPayloadDTO, SmeltFailedEventPayloadDTO } from "@/types";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 /**
@@ -94,7 +90,7 @@ export function subscribeWithRetry(
   supabase: SupabaseClient,
   smeltId: string,
   callbacks: SmeltSubscriptionCallbacks,
-  maxRetries: number = 3
+  maxRetries = 3
 ): SmeltSubscriptionHandle {
   let currentHandle: SmeltSubscriptionHandle | null = null;
   let retryCount = 0;

@@ -4,13 +4,7 @@
  */
 
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  SmeltStatus,
-  SmeltErrorCode,
-  SmeltFileStatus,
-  SmeltFileProgressDTO,
-  SmeltResultDTO,
-} from "@/types";
+import type { SmeltStatus, SmeltErrorCode, SmeltFileStatus, SmeltFileProgressDTO, SmeltResultDTO } from "@/types";
 import { SmeltBroadcaster } from "./broadcast";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -240,13 +234,11 @@ async function generateResults(supabase: SupabaseClient, smeltId: string): Promi
   // - Apply prompts to transcription
   // - Generate formatted output
 
-  const results: SmeltResultDTO[] = (smelt.smelt_files ?? []).map(
-    (file: { id: string; filename: string | null }) => ({
-      file_id: file.id,
-      filename: file.filename ?? "unknown",
-      content: "Processed content placeholder",
-    })
-  );
+  const results: SmeltResultDTO[] = (smelt.smelt_files ?? []).map((file: { id: string; filename: string | null }) => ({
+    file_id: file.id,
+    filename: file.filename ?? "unknown",
+    content: "Processed content placeholder",
+  }));
 
   return results;
 }

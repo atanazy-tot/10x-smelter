@@ -5,13 +5,7 @@
 
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import type {
-  SmeltStatus,
-  SmeltErrorCode,
-  SmeltFileProgressDTO,
-  SmeltResultDTO,
-  SmeltProgressDTO,
-} from "@/types";
+import type { SmeltStatus, SmeltErrorCode, SmeltFileProgressDTO, SmeltResultDTO, SmeltProgressDTO } from "@/types";
 
 /**
  * Broadcaster class that maintains a persistent channel for a smelt's processing lifecycle.
@@ -19,7 +13,7 @@ import type {
  */
 export class SmeltBroadcaster {
   private channel: RealtimeChannel;
-  private subscribed: boolean = false;
+  private subscribed = false;
 
   constructor(
     private supabase: SupabaseClient,
@@ -48,7 +42,12 @@ export class SmeltBroadcaster {
   /**
    * Broadcasts a progress update.
    */
-  async progress(status: SmeltStatus, percentage: number, message: string, files: SmeltFileProgressDTO[]): Promise<void> {
+  async progress(
+    status: SmeltStatus,
+    percentage: number,
+    message: string,
+    files: SmeltFileProgressDTO[]
+  ): Promise<void> {
     if (!this.subscribed) {
       console.warn("Broadcasting without subscription - message may not be delivered");
     }

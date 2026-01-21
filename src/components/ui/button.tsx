@@ -17,12 +17,25 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Neobrutalist variants
+        neo: "bg-neo-black text-neo-white font-mono uppercase tracking-wider border-2 border-neo-black shadow-[4px_4px_0px_0px_var(--neo-black)] hover:shadow-[2px_2px_0px_0px_var(--neo-black)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]",
+        "neo-lime":
+          "bg-neo-lime text-neo-black font-mono uppercase tracking-wider border-2 border-neo-black shadow-[4px_4px_0px_0px_var(--neo-black)] hover:shadow-[2px_2px_0px_0px_var(--neo-black)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]",
+        "neo-coral":
+          "bg-neo-coral text-neo-white font-mono uppercase tracking-wider border-2 border-neo-black shadow-[4px_4px_0px_0px_var(--neo-black)] hover:shadow-[2px_2px_0px_0px_var(--neo-black)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]",
+        "neo-outline":
+          "bg-transparent text-neo-black font-mono uppercase tracking-wider border-2 border-neo-black hover:bg-neo-black hover:text-neo-white",
+        "neo-ghost": "bg-transparent text-neo-black font-mono uppercase tracking-wider hover:bg-neo-black/10",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
+        // Neobrutalist sizes
+        "neo-sm": "h-8 px-3 text-xs",
+        "neo-md": "h-10 px-5 text-sm",
+        "neo-lg": "h-12 px-8 text-base",
       },
     },
     defaultVariants: {
