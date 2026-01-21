@@ -21,29 +21,29 @@ export function FileItem({ file, onRemove }: FileItemProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 border-2 border-neo-black font-mono text-sm",
-        file.isValid ? "bg-neo-white" : "bg-neo-coral/20"
+        "flex items-center gap-3 p-3 border-2 border-border font-mono text-sm",
+        file.isValid ? "bg-background" : "bg-neo-coral/20"
       )}
     >
       {file.isValid ? (
-        <FileAudio className="w-5 h-5 text-neo-black shrink-0" />
+        <FileAudio className="w-5 h-5 text-foreground shrink-0" />
       ) : (
         <AlertTriangle className="w-5 h-5 text-neo-coral shrink-0" />
       )}
 
       <div className="flex-1 min-w-0">
-        <p className="truncate uppercase text-neo-black">{file.file.name}</p>
-        <p className="text-xs text-neo-black/60">{formatFileSize(file.file.size)}</p>
+        <p className="truncate uppercase text-foreground">{file.file.name}</p>
+        <p className="text-xs text-foreground/60">{formatFileSize(file.file.size)}</p>
         {file.error && <p className="text-xs text-neo-coral uppercase mt-1">{file.error.message}</p>}
       </div>
 
       <button
         type="button"
         onClick={() => onRemove(file.id)}
-        className="p-1 hover:bg-neo-black/10 transition-colors"
+        className="p-1 hover:bg-foreground/10 transition-colors"
         aria-label={`Remove ${file.file.name}`}
       >
-        <X className="w-4 h-4 text-neo-black" />
+        <X className="w-4 h-4 text-foreground" />
       </button>
     </div>
   );

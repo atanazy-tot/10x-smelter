@@ -30,7 +30,7 @@ export function PredefinedPromptSelector({ className }: PredefinedPromptSelector
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <p className="text-xs font-mono uppercase text-neo-black/60 tracking-wider">SELECT PROMPT</p>
+      <p className="text-xs font-mono uppercase text-foreground/60 tracking-wider">SELECT PROMPT</p>
 
       <div className="flex flex-wrap gap-2">
         {PREDEFINED_PROMPTS.map((prompt) => {
@@ -43,12 +43,12 @@ export function PredefinedPromptSelector({ className }: PredefinedPromptSelector
               type="button"
               onClick={() => togglePredefinedPrompt(prompt.name)}
               className={cn(
-                "py-2 px-3 font-mono text-xs uppercase tracking-wider transition-all border-2 border-neo-black",
+                "py-2 px-3 font-mono text-xs uppercase tracking-wider transition-all border-2 border-border",
                 isSelected
-                  ? "bg-neo-lime text-neo-black shadow-[2px_2px_0px_0px_var(--neo-black)]"
+                  ? "bg-main text-main-foreground shadow-[2px_2px_0px_0px_var(--shadow)]"
                   : hasCustomSelected
-                    ? "bg-neo-white/50 text-neo-black/40"
-                    : "bg-neo-white text-neo-black hover:bg-neo-black hover:text-neo-white"
+                    ? "bg-background/50 text-foreground/40"
+                    : "bg-background text-foreground hover:bg-foreground hover:text-background"
               )}
             >
               {prompt.label}
@@ -58,7 +58,7 @@ export function PredefinedPromptSelector({ className }: PredefinedPromptSelector
       </div>
 
       {selectedPredefinedPrompts.length > 1 && (
-        <p className="text-xs font-mono text-neo-black/40">{selectedPredefinedPrompts.length} PROMPTS SELECTED</p>
+        <p className="text-xs font-mono text-foreground/40">{selectedPredefinedPrompts.length} PROMPTS SELECTED</p>
       )}
     </div>
   );

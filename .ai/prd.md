@@ -450,17 +450,6 @@ US-009: Text Input Entry
   - Text input enables process button
   - Empty text input disables process button
 
-US-010: Switch Between File and Text Input
-- Title: Change input method before processing
-- Description: As a user who selected the wrong input method, I want to switch between file upload and text input, so that I can correct my choice.
-- Acceptance Criteria:
-  - Selecting files automatically clears text input
-  - Entering text automatically clears selected files
-  - Only one input method active at a time
-  - Process button reflects active input method
-  - No confirmation required for switching
-  - Previously entered data is lost when switching
-
 ### 5.3 Prompt Selection and Management
 
 US-011: Select Predefined Prompt

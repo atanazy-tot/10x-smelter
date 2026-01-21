@@ -91,9 +91,9 @@ export function DropZone({ className }: DropZoneProps) {
           }
         }}
         className={cn(
-          "relative flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-neo-black bg-neo-white cursor-pointer transition-all font-mono",
-          isDragging && "bg-neo-lime/20 border-neo-lime",
-          "hover:bg-neo-black/5"
+          "relative flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-border bg-background cursor-pointer transition-all font-mono",
+          isDragging && "bg-main/20 border-main",
+          "hover:bg-foreground/5"
         )}
       >
         <input
@@ -106,20 +106,20 @@ export function DropZone({ className }: DropZoneProps) {
           aria-label="Upload audio files"
         />
 
-        <Upload className="w-12 h-12 text-neo-black" />
+        <Upload className="w-12 h-12 text-foreground" />
 
         <div className="text-center">
-          <p className="text-lg uppercase tracking-wider text-neo-black">
+          <p className="text-lg uppercase tracking-wider text-foreground">
             {isDragging ? "DROP IT" : "DROP AUDIO FILES HERE"}
           </p>
-          <p className="text-sm text-neo-black/60 mt-1">OR CLICK TO BROWSE</p>
-          <p className="text-xs text-neo-black/40 mt-2">.MP3 .WAV .M4A - MAX 25MB</p>
+          <p className="text-sm text-foreground/60 mt-1">OR CLICK TO BROWSE</p>
+          <p className="text-xs text-foreground/40 mt-2">.MP3 .WAV .M4A - MAX 25MB</p>
         </div>
 
-        {!isAuthenticated && <p className="text-xs text-neo-black/60 uppercase">1 FILE LIMIT - LOGIN FOR MORE</p>}
+        {!isAuthenticated && <p className="text-xs text-foreground/60 uppercase">1 FILE LIMIT - LOGIN FOR MORE</p>}
 
         {isAuthenticated && (
-          <p className="text-xs text-neo-black/60 uppercase">
+          <p className="text-xs text-foreground/60 uppercase">
             {validFilesCount}/{max} FILES
           </p>
         )}

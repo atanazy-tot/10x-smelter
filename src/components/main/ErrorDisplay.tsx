@@ -112,11 +112,11 @@ export function ErrorDisplay({ className }: ErrorDisplayProps) {
   };
 
   return (
-    <div className={cn("flex flex-col gap-4 p-6 bg-neo-coral border-2 border-neo-black", className)}>
+    <div className={cn("flex flex-col gap-4 p-6 bg-neo-coral border-2 border-border", className)}>
       <div className="flex items-start gap-4">
-        <AlertTriangle className="w-6 h-6 text-neo-white shrink-0 mt-1" />
+        <AlertTriangle className="w-6 h-6 text-background shrink-0 mt-1" />
         <div className="flex-1">
-          <p className="font-mono text-neo-white uppercase tracking-wider">{config.message}</p>
+          <p className="font-mono text-background uppercase tracking-wider">{config.message}</p>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export function ErrorDisplay({ className }: ErrorDisplayProps) {
           <button
             type="button"
             onClick={handleCtaClick}
-            className="flex items-center gap-2 py-2 px-4 bg-neo-white text-neo-black font-mono text-sm uppercase tracking-wider border-2 border-neo-black hover:bg-neo-black hover:text-neo-white transition-colors"
+            className="flex items-center gap-2 py-2 px-4 bg-background text-foreground font-mono text-sm uppercase tracking-wider border-2 border-border hover:bg-foreground hover:text-background transition-colors"
           >
             <Icon className="w-4 h-4" />
             {config.cta.label}
@@ -135,7 +135,7 @@ export function ErrorDisplay({ className }: ErrorDisplayProps) {
         <button
           type="button"
           onClick={handleDismiss}
-          className="py-2 px-4 bg-transparent text-neo-white font-mono text-sm uppercase tracking-wider border-2 border-neo-white hover:bg-neo-white hover:text-neo-coral transition-colors"
+          className="py-2 px-4 bg-transparent text-background font-mono text-sm uppercase tracking-wider border-2 border-background hover:bg-background hover:text-neo-coral transition-colors"
         >
           DISMISS
         </button>

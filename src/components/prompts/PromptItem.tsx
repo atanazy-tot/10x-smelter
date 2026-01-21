@@ -51,10 +51,10 @@ export function PromptItem({ prompt, className }: PromptItemProps) {
         }
       }}
       className={cn(
-        "group flex items-center justify-between p-3 border-2 border-neo-black cursor-pointer transition-all",
+        "group flex items-center justify-between p-3 border-2 border-border cursor-pointer transition-all",
         isSelected
-          ? "bg-neo-lime text-neo-black shadow-[2px_2px_0px_0px_var(--neo-black)]"
-          : "bg-neo-white text-neo-black hover:bg-neo-black/5",
+          ? "bg-main text-main-foreground shadow-[2px_2px_0px_0px_var(--shadow)]"
+          : "bg-background text-foreground hover:bg-foreground/5",
         className
       )}
     >
@@ -64,7 +64,7 @@ export function PromptItem({ prompt, className }: PromptItemProps) {
         <button
           type="button"
           onClick={handleEdit}
-          className="p-1 hover:bg-neo-black/10 rounded"
+          className="p-1 hover:bg-foreground/10 rounded"
           aria-label={`Edit ${prompt.title}`}
         >
           <Edit2 className="w-4 h-4" />

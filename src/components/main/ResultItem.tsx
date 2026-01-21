@@ -34,13 +34,13 @@ export function ResultItem({ result, className }: ResultItemProps) {
   return (
     <div className={cn("flex flex-col", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-neo-black border-2 border-neo-black">
-        <span className="font-mono text-sm uppercase text-neo-lime truncate">{result.filename}</span>
+      <div className="flex items-center justify-between p-3 bg-foreground border-2 border-border">
+        <span className="font-mono text-sm uppercase text-main truncate">{result.filename}</span>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={handleCopy}
-            className="p-2 text-neo-white hover:text-neo-lime transition-colors"
+            className="p-2 text-background hover:text-main transition-colors"
             aria-label="Copy to clipboard"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -48,7 +48,7 @@ export function ResultItem({ result, className }: ResultItemProps) {
           <button
             type="button"
             onClick={handleDownload}
-            className="p-2 text-neo-white hover:text-neo-lime transition-colors"
+            className="p-2 text-background hover:text-main transition-colors"
             aria-label="Download as markdown"
           >
             <Download className="w-4 h-4" />
@@ -57,8 +57,8 @@ export function ResultItem({ result, className }: ResultItemProps) {
       </div>
 
       {/* Content */}
-      <div className="bg-neo-black border-2 border-t-0 border-neo-black p-4 max-h-[400px] overflow-y-auto">
-        <pre className="font-mono text-sm text-neo-lime whitespace-pre-wrap break-words">{result.content}</pre>
+      <div className="bg-foreground border-2 border-t-0 border-border p-4 max-h-[400px] overflow-y-auto">
+        <pre className="font-mono text-sm text-main whitespace-pre-wrap break-words">{result.content}</pre>
       </div>
     </div>
   );

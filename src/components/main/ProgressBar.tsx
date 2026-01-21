@@ -27,7 +27,7 @@ function getStageColor(stage: SmeltStatus): string {
     case "failed":
       return "bg-stage-failed";
     default:
-      return "bg-neo-black/20";
+      return "bg-foreground/20";
   }
 }
 
@@ -75,8 +75,8 @@ export function ProgressBar({ className }: ProgressBarProps) {
           <div
             key={index}
             className={cn(
-              "flex-1 h-8 border-2 border-neo-black transition-colors duration-300",
-              index < filledBlocks ? stageColor : "bg-neo-white"
+              "flex-1 h-8 border-2 border-border transition-colors duration-300",
+              index < filledBlocks ? stageColor : "bg-background"
             )}
           />
         ))}
@@ -84,13 +84,13 @@ export function ProgressBar({ className }: ProgressBarProps) {
 
       {/* Progress info */}
       <div className="flex justify-between items-center font-mono text-sm">
-        <span className="uppercase text-neo-black">{stageLabel}</span>
-        <span className="text-neo-black/60">{percentage}%</span>
+        <span className="uppercase text-foreground">{stageLabel}</span>
+        <span className="text-foreground/60">{percentage}%</span>
       </div>
 
       {/* Progress message if different from stage label */}
       {progress.message && progress.message !== stageLabel && (
-        <p className="text-xs font-mono text-neo-black/40 uppercase">{progress.message}</p>
+        <p className="text-xs font-mono text-foreground/40 uppercase">{progress.message}</p>
       )}
     </div>
   );

@@ -37,7 +37,7 @@ export function TextZone({ className }: TextZoneProps) {
           onChange={handleChange}
           placeholder="PASTE YOUR TEXT HERE..."
           className={cn(
-            "w-full min-h-[160px] bg-neo-white text-neo-black font-mono text-sm border-2 border-neo-black p-4 placeholder:text-neo-black/40 placeholder:uppercase focus:outline-none focus:ring-0 resize-none",
+            "w-full min-h-[160px] bg-background text-foreground font-mono text-sm border-2 border-border p-4 placeholder:text-foreground/40 placeholder:uppercase focus:outline-none focus:ring-0 resize-none",
             isOverLimit && "border-neo-coral"
           )}
           aria-label="Text input"
@@ -47,7 +47,7 @@ export function TextZone({ className }: TextZoneProps) {
         <div
           className={cn(
             "absolute bottom-2 right-2 text-xs font-mono uppercase",
-            isOverLimit ? "text-neo-coral" : isNearLimit ? "text-neo-yellow" : "text-neo-black/40"
+            isOverLimit ? "text-neo-coral" : isNearLimit ? "text-neo-yellow" : "text-foreground/40"
           )}
         >
           {charCount.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}

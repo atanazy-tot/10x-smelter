@@ -15,7 +15,7 @@ export function CreditDisplay({ className }: CreditDisplayProps) {
 
   if (isLoading) {
     return (
-      <span className={cn("font-mono text-xs uppercase tracking-wider text-neo-black/40", className)}>LOADING...</span>
+      <span className={cn("font-mono text-xs uppercase tracking-wider text-foreground/40", className)}>LOADING...</span>
     );
   }
 
@@ -30,14 +30,14 @@ export function CreditDisplay({ className }: CreditDisplayProps) {
     case "anonymous": {
       const remaining = usage.daily_limit - usage.smelts_used_today;
       text = `${remaining}/${usage.daily_limit} DAILY SMELT`;
-      colorClass = remaining > 0 ? "text-neo-lime" : "text-neo-coral";
+      colorClass = remaining > 0 ? "text-main" : "text-neo-coral";
       break;
     }
     case "authenticated": {
       const remaining = usage.credits_remaining;
       const max = usage.weekly_credits_max;
       text = `${remaining}/${max} LEFT THIS WEEK`;
-      colorClass = remaining > 0 ? "text-neo-lime" : "text-neo-coral";
+      colorClass = remaining > 0 ? "text-main" : "text-neo-coral";
       break;
     }
     case "unlimited": {
@@ -52,7 +52,7 @@ export function CreditDisplay({ className }: CreditDisplayProps) {
   return (
     <span
       className={cn(
-        "font-mono text-xs uppercase tracking-wider px-2 py-1 border-2 border-neo-black bg-neo-black",
+        "font-mono text-xs uppercase tracking-wider px-2 py-1 border-2 border-border bg-foreground",
         colorClass,
         className
       )}

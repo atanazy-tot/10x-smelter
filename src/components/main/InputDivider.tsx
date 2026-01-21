@@ -18,16 +18,16 @@ export function InputDivider({ className }: InputDividerProps) {
 
   return (
     <div className={cn("flex items-center gap-4 py-4", className)}>
-      <div className="flex-1 h-[2px] bg-neo-black" />
+      <div className="flex-1 h-[2px] bg-border" />
       <span
         className={cn(
           "font-mono text-sm uppercase tracking-widest px-4",
-          activeInputType === "both" ? "text-neo-lime" : "text-neo-black/60"
+          activeInputType === "both" ? "text-main" : "text-foreground/60"
         )}
       >
         {label}
       </span>
-      <div className="flex-1 h-[2px] bg-neo-black" />
+      <div className="flex-1 h-[2px] bg-border" />
     </div>
   );
 }

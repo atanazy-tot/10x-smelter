@@ -74,7 +74,7 @@ export function PromptEditor({ className }: PromptEditorProps) {
     <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4", className)}>
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-neo-black/50"
+        className="absolute inset-0 bg-foreground/50"
         onClick={handleClose}
         onKeyDown={(e) => {
           if (e.key === "Escape") handleClose();
@@ -85,19 +85,19 @@ export function PromptEditor({ className }: PromptEditorProps) {
       />
 
       {/* Editor */}
-      <div className="relative w-full max-w-lg bg-neo-white border-2 border-neo-black shadow-[8px_8px_0px_0px_var(--neo-black)]">
+      <div className="relative w-full max-w-lg bg-background border-2 border-border shadow-[8px_8px_0px_0px_var(--shadow)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b-2 border-neo-black">
-          <h2 className="font-mono text-lg uppercase tracking-wider text-neo-black">
+        <div className="flex items-center justify-between p-4 border-b-2 border-border">
+          <h2 className="font-mono text-lg uppercase tracking-wider text-foreground">
             {isEditing ? "EDIT PROMPT" : "NEW PROMPT"}
           </h2>
           <button
             type="button"
             onClick={handleClose}
-            className="p-1 hover:bg-neo-black/10 transition-colors"
+            className="p-1 hover:bg-foreground/10 transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-neo-black" />
+            <X className="w-5 h-5 text-foreground" />
           </button>
         </div>
 
@@ -110,7 +110,7 @@ export function PromptEditor({ className }: PromptEditorProps) {
           )}
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="prompt-title" className="font-mono text-xs uppercase text-neo-black/60">
+            <label htmlFor="prompt-title" className="font-mono text-xs uppercase text-foreground/60">
               TITLE
             </label>
             <input
@@ -119,13 +119,13 @@ export function PromptEditor({ className }: PromptEditorProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="E.G., MEETING SUMMARY"
-              className="w-full p-3 font-mono text-sm border-2 border-neo-black bg-neo-white text-neo-black placeholder:text-neo-black/40 placeholder:uppercase focus:outline-none"
+              className="w-full p-3 font-mono text-sm border-2 border-border bg-background text-foreground placeholder:text-foreground/40 placeholder:uppercase focus:outline-none"
               maxLength={100}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="prompt-body" className="font-mono text-xs uppercase text-neo-black/60">
+            <label htmlFor="prompt-body" className="font-mono text-xs uppercase text-foreground/60">
               PROMPT BODY
             </label>
             <textarea
@@ -133,17 +133,17 @@ export function PromptEditor({ className }: PromptEditorProps) {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="ENTER YOUR PROMPT INSTRUCTIONS..."
-              className="w-full min-h-[200px] p-3 font-mono text-sm border-2 border-neo-black bg-neo-white text-neo-black placeholder:text-neo-black/40 placeholder:uppercase focus:outline-none resize-none"
+              className="w-full min-h-[200px] p-3 font-mono text-sm border-2 border-border bg-background text-foreground placeholder:text-foreground/40 placeholder:uppercase focus:outline-none resize-none"
               maxLength={5000}
             />
-            <span className="font-mono text-xs text-neo-black/40 text-right">{body.length}/5000</span>
+            <span className="font-mono text-xs text-foreground/40 text-right">{body.length}/5000</span>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 py-3 font-mono text-sm uppercase tracking-wider border-2 border-neo-black bg-neo-white text-neo-black hover:bg-neo-black hover:text-neo-white transition-colors"
+              className="flex-1 py-3 font-mono text-sm uppercase tracking-wider border-2 border-border bg-background text-foreground hover:bg-foreground hover:text-background transition-colors"
             >
               CANCEL
             </button>
@@ -151,10 +151,10 @@ export function PromptEditor({ className }: PromptEditorProps) {
               type="submit"
               disabled={isSubmitting}
               className={cn(
-                "flex-1 py-3 font-mono text-sm uppercase tracking-wider border-2 border-neo-black transition-colors",
+                "flex-1 py-3 font-mono text-sm uppercase tracking-wider border-2 border-border transition-colors",
                 isSubmitting
-                  ? "bg-neo-black/50 text-neo-white cursor-wait"
-                  : "bg-neo-lime text-neo-black hover:bg-neo-black hover:text-neo-lime"
+                  ? "bg-foreground/50 text-background cursor-wait"
+                  : "bg-main text-main-foreground hover:bg-foreground hover:text-main"
               )}
             >
               {isSubmitting ? "SAVING..." : isEditing ? "UPDATE" : "CREATE"}

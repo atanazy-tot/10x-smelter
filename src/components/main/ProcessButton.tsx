@@ -15,14 +15,17 @@ export function ProcessButton({ className }: ProcessButtonProps) {
   const status = useProcessingStore((state) => state.status);
   const startProcessing = useProcessingStore((state) => state.startProcessing);
   const usage = useAuthStore((state) => state.usage);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasSelection = usePromptStore((state) => state.hasSelection);
 
   const isProcessing = status === "processing";
-  const isDisabled = !canProcess() || isProcessing;
+  // Anonymous users don't need to select a prompt (auto-summarize)
+  const needsPrompt = isAuthenticated && !hasSelection();
+  const isDisabled = !canProcess() || isProcessing || needsPrompt;
 
   // Determine button state message
   let disabledReason = "";
-  if (!hasSelection()) {
+  if (needsPrompt) {
     disabledReason = "SELECT A PROMPT";
   } else if (!usage?.can_process) {
     disabledReason = "NO CREDITS";
@@ -30,6 +33,10 @@ export function ProcessButton({ className }: ProcessButtonProps) {
 
   const handleClick = () => {
     if (!isDisabled) {
+      // For anonymous users, auto-select summarize before processing
+      if (!isAuthenticated) {
+        usePromptStore.getState().togglePredefinedPrompt("summarize");
+      }
       startProcessing();
     }
   };
@@ -41,12 +48,12 @@ export function ProcessButton({ className }: ProcessButtonProps) {
         onClick={handleClick}
         disabled={isDisabled}
         className={cn(
-          "w-full py-4 font-mono text-lg uppercase tracking-widest transition-all border-2 border-neo-black",
+          "w-full py-4 font-mono text-lg uppercase tracking-widest transition-all border-2 border-border",
           isProcessing
-            ? "bg-neo-yellow text-neo-black cursor-wait"
+            ? "bg-neo-yellow text-foreground cursor-wait"
             : isDisabled
-              ? "bg-neo-white/50 text-neo-black/40 cursor-not-allowed"
-              : "bg-neo-lime text-neo-black shadow-[4px_4px_0px_0px_var(--neo-black)] hover:shadow-[2px_2px_0px_0px_var(--neo-black)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
+              ? "bg-background/50 text-foreground/40 cursor-not-allowed"
+              : "bg-main text-main-foreground shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none"
         )}
       >
         {isProcessing ? (
@@ -60,7 +67,7 @@ export function ProcessButton({ className }: ProcessButtonProps) {
       </button>
 
       {disabledReason && !isProcessing && (
-        <p className="text-xs font-mono text-neo-black/40 text-center uppercase">{disabledReason}</p>
+        <p className="text-xs font-mono text-foreground/40 text-center uppercase">{disabledReason}</p>
       )}
     </div>
   );

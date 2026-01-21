@@ -34,15 +34,17 @@ export function CombineModeToggle({ className }: CombineModeToggleProps) {
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <p className="text-xs font-mono uppercase text-neo-black/60 tracking-wider">PROCESSING MODE</p>
+      <p className="text-xs font-mono uppercase text-foreground/60 tracking-wider">PROCESSING MODE</p>
 
-      <div className="flex border-2 border-neo-black">
+      <div className="flex border-2 border-border">
         <button
           type="button"
           onClick={() => handleModeChange("separate")}
           className={cn(
             "flex-1 py-2 px-4 font-mono text-sm uppercase tracking-wider transition-colors",
-            mode === "separate" ? "bg-neo-black text-neo-white" : "bg-neo-white text-neo-black hover:bg-neo-black/10"
+            mode === "separate"
+              ? "bg-foreground text-background"
+              : "bg-background text-foreground hover:bg-foreground/10"
           )}
         >
           SEPARATE
@@ -54,19 +56,19 @@ export function CombineModeToggle({ className }: CombineModeToggleProps) {
           disabled={!isAuthenticated}
           title={!isAuthenticated ? "LOGIN REQUIRED FOR COMBINE MODE" : undefined}
           className={cn(
-            "flex-1 py-2 px-4 font-mono text-sm uppercase tracking-wider transition-colors border-l-2 border-neo-black",
+            "flex-1 py-2 px-4 font-mono text-sm uppercase tracking-wider transition-colors border-l-2 border-border",
             mode === "combine"
-              ? "bg-neo-black text-neo-white"
+              ? "bg-foreground text-background"
               : isAuthenticated
-                ? "bg-neo-white text-neo-black hover:bg-neo-black/10"
-                : "bg-neo-white/50 text-neo-black/40 cursor-not-allowed"
+                ? "bg-background text-foreground hover:bg-foreground/10"
+                : "bg-background/50 text-foreground/40 cursor-not-allowed"
           )}
         >
           COMBINE
         </button>
       </div>
 
-      <p className="text-xs font-mono text-neo-black/40">
+      <p className="text-xs font-mono text-foreground/40">
         {mode === "separate" ? "EACH FILE PROCESSED INDIVIDUALLY" : "ALL FILES COMBINED INTO ONE OUTPUT"}
       </p>
 

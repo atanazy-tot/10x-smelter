@@ -37,27 +37,27 @@ export function ResultsView({ className }: ResultsViewProps) {
     <div className={cn("flex flex-col gap-4", className)}>
       {/* Results header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-mono text-lg uppercase text-neo-black tracking-wider">RESULTS</h2>
+        <h2 className="font-mono text-lg uppercase text-foreground tracking-wider">RESULTS</h2>
 
         {hasMultipleResults && (
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={goToPrevious}
-              className="p-2 border-2 border-neo-black bg-neo-white hover:bg-neo-black hover:text-neo-white transition-colors"
+              className="p-2 border-2 border-border bg-background hover:bg-foreground hover:text-background transition-colors"
               aria-label="Previous result"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <span className="font-mono text-sm text-neo-black">
+            <span className="font-mono text-sm text-foreground">
               {currentIndex + 1} / {results.length}
             </span>
 
             <button
               type="button"
               onClick={goToNext}
-              className="p-2 border-2 border-neo-black bg-neo-white hover:bg-neo-black hover:text-neo-white transition-colors"
+              className="p-2 border-2 border-border bg-background hover:bg-foreground hover:text-background transition-colors"
               aria-label="Next result"
             >
               <ChevronRight className="w-4 h-4" />
@@ -78,8 +78,8 @@ export function ResultsView({ className }: ResultsViewProps) {
               type="button"
               onClick={() => setCurrentIndex(index)}
               className={cn(
-                "w-3 h-3 border-2 border-neo-black transition-colors",
-                index === currentIndex ? "bg-neo-lime" : "bg-neo-white hover:bg-neo-black/20"
+                "w-3 h-3 border-2 border-border transition-colors",
+                index === currentIndex ? "bg-main" : "bg-background hover:bg-foreground/20"
               )}
               aria-label={`Go to result ${index + 1}`}
             />

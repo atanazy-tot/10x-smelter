@@ -18,10 +18,10 @@ export function Header({ className }: HeaderProps) {
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
 
   return (
-    <header className={cn("flex items-center justify-between p-4 border-b-2 border-neo-black bg-neo-white", className)}>
+    <header className={cn("flex items-center justify-between p-4 border-b-2 border-border bg-background", className)}>
       {/* Logo */}
       <a href="/" className="flex items-center gap-2 group">
-        <span className="font-mono text-2xl font-bold uppercase tracking-wider text-neo-black group-hover:text-neo-lime transition-colors">
+        <span className="font-mono text-2xl font-bold uppercase tracking-wider text-foreground group-hover:text-main transition-colors">
           SMELT
         </span>
       </a>
@@ -36,7 +36,7 @@ export function Header({ className }: HeaderProps) {
             <button
               type="button"
               onClick={toggleSidebar}
-              className="p-2 border-2 border-neo-black bg-neo-white text-neo-black hover:bg-neo-black hover:text-neo-white transition-colors"
+              className="p-2 border-2 border-border bg-background text-foreground hover:bg-foreground hover:text-background transition-colors"
               aria-label="Toggle prompts sidebar"
               title="Custom Prompts"
             >
@@ -46,7 +46,7 @@ export function Header({ className }: HeaderProps) {
             {/* Settings */}
             <a
               href="/settings"
-              className="p-2 border-2 border-neo-black bg-neo-white text-neo-black hover:bg-neo-black hover:text-neo-white transition-colors"
+              className="p-2 border-2 border-border bg-background text-foreground hover:bg-foreground hover:text-background transition-colors"
               aria-label="Settings"
               title="Settings"
             >
@@ -55,13 +55,13 @@ export function Header({ className }: HeaderProps) {
 
             {/* User menu / Logout */}
             <div className="flex items-center gap-2">
-              <span className="hidden sm:block font-mono text-xs text-neo-black/60 uppercase truncate max-w-[120px]">
+              <span className="hidden sm:block font-mono text-xs text-foreground/60 uppercase truncate max-w-[120px]">
                 {user?.email}
               </span>
               <button
                 type="button"
                 onClick={() => logout()}
-                className="p-2 border-2 border-neo-black bg-neo-white text-neo-black hover:bg-neo-coral hover:text-neo-white hover:border-neo-coral transition-colors"
+                className="p-2 border-2 border-border bg-background text-foreground hover:bg-neo-coral hover:text-background hover:border-neo-coral transition-colors"
                 aria-label="Logout"
                 title="Logout"
               >
@@ -72,7 +72,7 @@ export function Header({ className }: HeaderProps) {
         ) : (
           <a
             href="/auth"
-            className="flex items-center gap-2 py-2 px-4 font-mono text-sm uppercase tracking-wider border-2 border-neo-black bg-neo-lime text-neo-black hover:bg-neo-black hover:text-neo-lime transition-colors"
+            className="flex items-center gap-2 py-2 px-4 font-mono text-sm uppercase tracking-wider border-2 border-border bg-main text-main-foreground hover:bg-foreground hover:text-main transition-colors"
           >
             <User className="w-4 h-4" />
             LOGIN
