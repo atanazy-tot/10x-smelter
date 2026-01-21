@@ -21,6 +21,8 @@ interface ImportMetaEnv {
   // Client-side (PUBLIC_ prefix exposes to browser)
   readonly PUBLIC_SUPABASE_URL: string;
   readonly PUBLIC_SUPABASE_ANON_KEY: string;
+  // Mock mode for frontend-only testing (set to "true" to enable)
+  readonly PUBLIC_MOCK_PROCESSING?: string;
 }
 
 interface ImportMeta {

@@ -6,7 +6,6 @@ import { create } from "zustand";
 import type { InputState, FileWithValidation, ActiveInputType, ValidationError } from "./types";
 import type { SmeltMode } from "@/types";
 import { useAuthStore } from "./auth";
-import { usePromptStore } from "./prompt";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 const MAX_FILES_AUTHENTICATED = 5;
@@ -138,15 +137,10 @@ export const useInputStore = create<InputState>((set, get) => ({
   canProcess: (): boolean => {
     const state = get();
     const authState = useAuthStore.getState();
-    const promptState = usePromptStore.getState();
 
     // Must have input
     const hasInput = state.getActiveInputType() !== "none";
     if (!hasInput) return false;
-
-    // Must have prompt selection
-    const hasPrompt = promptState.hasSelection();
-    if (!hasPrompt) return false;
 
     // Must have no validation errors
     if (state.validationErrors.length > 0) return false;

@@ -11,7 +11,13 @@ interface ProcessButtonProps {
 }
 
 export function ProcessButton({ className }: ProcessButtonProps) {
-  const canProcess = useInputStore((state) => state.canProcess);
+  // Subscribe to input state that affects canProcess to trigger re-renders
+  const canProcess = useInputStore((state) => {
+    const hasInput = state.getActiveInputType() !== "none";
+    const hasValidationErrors = state.validationErrors.length > 0;
+    const hasInvalidFiles = state.files.some((f) => !f.isValid);
+    return hasInput && !hasValidationErrors && !hasInvalidFiles;
+  });
   const status = useProcessingStore((state) => state.status);
   const startProcessing = useProcessingStore((state) => state.startProcessing);
   const usage = useAuthStore((state) => state.usage);
@@ -21,7 +27,9 @@ export function ProcessButton({ className }: ProcessButtonProps) {
   const isProcessing = status === "processing";
   // Anonymous users don't need to select a prompt (auto-summarize)
   const needsPrompt = isAuthenticated && !hasSelection();
-  const isDisabled = !canProcess() || isProcessing || needsPrompt;
+  // Check both input state and credits
+  const hasCredits = usage?.can_process ?? false;
+  const isDisabled = !canProcess || !hasCredits || isProcessing || needsPrompt;
 
   // Determine button state message
   let disabledReason = "";

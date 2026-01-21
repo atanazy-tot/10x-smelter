@@ -14,6 +14,7 @@ import type {
 import { useInputStore } from "./input";
 import { usePromptStore } from "./prompt";
 import { useAuthStore } from "./auth";
+import { isMockModeEnabled, runMockProcessing } from "@/lib/mock/mock-processing";
 
 export const useProcessingStore = create<ProcessingState>((set) => ({
   status: "idle",
@@ -27,6 +28,49 @@ export const useProcessingStore = create<ProcessingState>((set) => ({
   startProcessing: async () => {
     const inputState = useInputStore.getState();
     const promptState = usePromptStore.getState();
+
+    // Check if mock mode is enabled
+    if (isMockModeEnabled()) {
+      // Set initial processing state with mock smeltId
+      set({
+        status: "processing",
+        smeltId: `mock-${Date.now()}`,
+        error: null,
+        results: [],
+        progress: {
+          percentage: 0,
+          stage: "pending",
+          message: "STARTING...",
+        },
+        subscriptionChannel: null,
+      });
+
+      // Run mock processing with store handlers
+      runMockProcessing(inputState.files, inputState.text, {
+        onProgress: (progress, fileProgress) => {
+          set({ progress, fileProgress });
+        },
+        onCompleted: (results) => {
+          set({
+            status: "completed",
+            results,
+            progress: {
+              percentage: 100,
+              stage: "completed",
+              message: "DONE!",
+            },
+          });
+        },
+        onFailed: (code, message) => {
+          set({
+            status: "failed",
+            error: { code: code as SmeltErrorCode, message },
+          });
+        },
+      });
+
+      return;
+    }
 
     // Build form data
     const formData = new FormData();
