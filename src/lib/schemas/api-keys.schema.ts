@@ -6,10 +6,7 @@ import { z } from "zod";
 const API_KEY_REGEX = /^sk-.{16,}$/;
 
 export const apiKeyCreateSchema = z.object({
-  api_key: z
-    .string()
-    .min(1, "API KEY REQUIRED")
-    .regex(API_KEY_REGEX, "INVALID API KEY FORMAT - MUST START WITH sk-"),
+  api_key: z.string().min(1, "API KEY REQUIRED").regex(API_KEY_REGEX, "INVALID API KEY FORMAT - MUST START WITH sk-"),
 });
 
 export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;

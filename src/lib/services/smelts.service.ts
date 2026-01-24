@@ -15,9 +15,10 @@ import {
   SmeltPromptNotFoundError,
 } from "@/lib/utils/smelt-errors";
 import { MAX_FILES } from "@/lib/schemas/smelts.schema";
-import { processSmelt } from "@/lib/realtime/processing.service";
+import { processSmelt, processSmeltWithFiles, type InMemoryFile } from "@/lib/realtime/processing.service";
 import { checkUsageLimits } from "@/lib/services/usage.service";
 import { hashIp } from "@/lib/utils/hash";
+import { uploadAudioFile, uploadTextContent } from "@/lib/services/storage";
 
 // =============================================================================
 // CREATE SMELT
@@ -108,6 +109,7 @@ export async function createSmelt(
     await deductCredit(supabase, userId);
 
     // Fire-and-forget: start processing in background
+    // Authenticated users: processSmelt will download files from Supabase Storage
     processSmelt(supabase, smelt.id).catch((error) => {
       console.error("Background processing error for smelt:", smelt.id, error);
     });
@@ -251,6 +253,7 @@ export async function listSmelts(
 /**
  * Creates a smelt for anonymous users using SECURITY DEFINER RPC.
  * This bypasses RLS since anonymous users can't SELECT from smelts.
+ * Files are processed in-memory (no storage upload for anonymous users).
  */
 async function createAnonymousSmelt(
   supabase: SupabaseClient,
@@ -306,8 +309,44 @@ async function createAnonymousSmelt(
     subscription_channel: string;
   };
 
-  // Fire-and-forget: start processing in background
-  processSmelt(supabase, result.id).catch((error) => {
+  // Prepare in-memory file data for processing (no storage for anonymous users)
+  const inMemoryFiles: InMemoryFile[] = [];
+
+  // Convert audio files to buffers
+  let fileIndex = 0;
+  for (const file of files) {
+    const fileRecord = result.files[fileIndex];
+    if (fileRecord) {
+      const arrayBuffer = await file.arrayBuffer();
+      inMemoryFiles.push({
+        id: fileRecord.id,
+        filename: file.name,
+        inputType: "audio",
+        buffer: Buffer.from(arrayBuffer),
+        mimeType: file.type || "audio/mpeg",
+      });
+    }
+    fileIndex++;
+  }
+
+  // Add text content if provided
+  if (input.text && result.files[fileIndex]) {
+    const textFileRecord = result.files[fileIndex];
+    inMemoryFiles.push({
+      id: textFileRecord.id,
+      filename: "text-input.txt",
+      inputType: "text",
+      text: input.text,
+    });
+  }
+
+  // Fire-and-forget: start processing in background with in-memory files
+  // Anonymous users don't use storage - files are processed directly
+  processSmeltWithFiles(supabase, result.id, inMemoryFiles, {
+    mode: result.mode as "separate" | "combine",
+    defaultPromptNames: result.default_prompt_names,
+    userPromptId: result.user_prompt_id,
+  }).catch((error) => {
     console.error("Background processing error for anonymous smelt:", result.id, error);
   });
 
@@ -369,6 +408,7 @@ async function verifyPromptOwnership(supabase: SupabaseClient, userId: string, p
 /**
  * Creates smelt_files records for audio files and/or text input.
  * Audio files get positions 0, 1, 2..., text input gets position after all audio files.
+ * Files are uploaded to Supabase Storage for processing.
  */
 async function createSmeltFiles(
   supabase: SupabaseClient,
@@ -395,6 +435,10 @@ async function createSmeltFiles(
       .single();
 
     if (error) throw error;
+
+    // Upload file to Supabase Storage
+    await uploadAudioFile(supabase, smeltId, data.id, file);
+
     smeltFiles.push(toSmeltFileDTO(data));
     position++;
   }
@@ -415,6 +459,10 @@ async function createSmeltFiles(
       .single();
 
     if (error) throw error;
+
+    // Upload text content to Supabase Storage
+    await uploadTextContent(supabase, smeltId, data.id, text);
+
     smeltFiles.push(toSmeltFileDTO(data));
   }
 

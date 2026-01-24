@@ -76,6 +76,137 @@ export function toAppError(error: unknown): AppError {
   return new InternalError();
 }
 
+// =============================================================================
+// LLM Service Errors
+// =============================================================================
+
+/**
+ * LLM request timed out.
+ */
+export class LLMTimeoutError extends AppError {
+  readonly status = 504;
+  readonly code = "llm_timeout";
+
+  constructor(message = "LLM REQUEST TIMED OUT") {
+    super(message);
+  }
+}
+
+/**
+ * LLM rate limit exceeded.
+ * Contains optional retryAfter for exponential backoff.
+ */
+export class LLMRateLimitError extends AppError {
+  readonly status = 429;
+  readonly code = "llm_rate_limit";
+  readonly retryAfter?: number;
+
+  constructor(retryAfter?: number) {
+    super("RATE LIMIT EXCEEDED. TRY AGAIN LATER");
+    this.retryAfter = retryAfter;
+  }
+}
+
+/**
+ * Generic LLM API error.
+ */
+export class LLMAPIError extends AppError {
+  readonly status = 502;
+  readonly code = "llm_api_error";
+
+  constructor(message = "LLM SERVICE UNAVAILABLE") {
+    super(message);
+  }
+}
+
+/**
+ * Transcription failed error.
+ */
+export class TranscriptionError extends AppError {
+  readonly status = 500;
+  readonly code = "transcription_failed";
+
+  constructor(message = "TRANSCRIPTION FAILED") {
+    super(message);
+  }
+}
+
+/**
+ * Synthesis/prompt application failed.
+ */
+export class SynthesisError extends AppError {
+  readonly status = 500;
+  readonly code = "synthesis_failed";
+
+  constructor(message = "SYNTHESIS FAILED") {
+    super(message);
+  }
+}
+
+// =============================================================================
+// Audio Processing Errors
+// =============================================================================
+
+/**
+ * Audio file too large.
+ */
+export class FileTooLargeError extends AppError {
+  readonly status = 413;
+  readonly code = "file_too_large";
+
+  constructor(message = "FILE TOO LARGE. MAX 25MB ALLOWED") {
+    super(message);
+  }
+}
+
+/**
+ * Invalid audio format.
+ */
+export class InvalidFormatError extends AppError {
+  readonly status = 415;
+  readonly code = "invalid_format";
+
+  constructor(message = "INVALID FILE FORMAT") {
+    super(message);
+  }
+}
+
+/**
+ * Audio duration exceeded limit.
+ */
+export class DurationExceededError extends AppError {
+  readonly status = 413;
+  readonly code = "duration_exceeded";
+
+  constructor(message = "AUDIO TOO LONG. MAX 30 MINUTES ALLOWED") {
+    super(message);
+  }
+}
+
+/**
+ * Audio file is corrupted.
+ */
+export class CorruptedFileError extends AppError {
+  readonly status = 422;
+  readonly code = "corrupted_file";
+
+  constructor(message = "FILE APPEARS CORRUPTED") {
+    super(message);
+  }
+}
+
+/**
+ * Audio conversion/decoding failed.
+ */
+export class AudioConversionError extends AppError {
+  readonly status = 500;
+  readonly code = "decoding_failed";
+
+  constructor(message = "AUDIO CONVERSION FAILED") {
+    super(message);
+  }
+}
+
 /**
  * Creates a JSON success response with proper headers.
  */
