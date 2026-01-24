@@ -15,6 +15,7 @@ import { useInputStore } from "./input";
 import { usePromptStore } from "./prompt";
 import { useAuthStore } from "./auth";
 import { isMockModeEnabled, runMockProcessing } from "@/lib/mock/mock-processing";
+import { getAccessToken } from "@/lib/utils/token-storage";
 
 export const useProcessingStore = create<ProcessingState>((set) => ({
   status: "idle",
@@ -113,9 +114,11 @@ export const useProcessingStore = create<ProcessingState>((set) => ({
     });
 
     try {
+      const token = getAccessToken();
       const response = await fetch("/api/smelts", {
         method: "POST",
         body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
       if (!response.ok) {

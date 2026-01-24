@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthContainer } from "./AuthContainer";
+import { apiFetch } from "@/lib/utils/api-client";
+import { clearTokens } from "@/lib/utils/token-storage";
 
 export function AuthIsland() {
   const [isReady, setIsReady] = useState(false);
@@ -7,7 +9,7 @@ export function AuthIsland() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch("/api/auth/session");
+        const res = await apiFetch("/api/auth/session");
         if (res.ok) {
           const session = await res.json();
           if (session.authenticated) {
@@ -15,8 +17,11 @@ export function AuthIsland() {
             return;
           }
         }
+        // Not authenticated - clear any stale tokens
+        clearTokens();
       } catch {
         // Ignore errors - show auth form
+        clearTokens();
       }
       setIsReady(true);
     };

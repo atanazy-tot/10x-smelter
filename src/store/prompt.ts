@@ -5,6 +5,7 @@
 import { create } from "zustand";
 import type { PromptState } from "./types";
 import type { DefaultPromptName, PromptDTO, PromptsListDTO, PromptSectionsListDTO } from "@/types";
+import { apiFetch } from "@/lib/utils/api-client";
 
 export const usePromptStore = create<PromptState>((set, get) => ({
   selectedPredefinedPrompts: [],
@@ -43,7 +44,7 @@ export const usePromptStore = create<PromptState>((set, get) => ({
   loadPrompts: async () => {
     set({ isLoading: true });
     try {
-      const response = await fetch("/api/prompts?limit=100");
+      const response = await apiFetch("/api/prompts?limit=100");
       if (response.ok) {
         const data: PromptsListDTO = await response.json();
         set({ customPrompts: data.prompts });
@@ -57,7 +58,7 @@ export const usePromptStore = create<PromptState>((set, get) => ({
 
   loadSections: async () => {
     try {
-      const response = await fetch("/api/prompt-sections");
+      const response = await apiFetch("/api/prompt-sections");
       if (response.ok) {
         const data: PromptSectionsListDTO = await response.json();
         set({ sections: data.sections });
@@ -79,7 +80,7 @@ export const usePromptStore = create<PromptState>((set, get) => ({
   },
 
   createPrompt: async (title: string, body: string, sectionId?: string) => {
-    const response = await fetch("/api/prompts", {
+    const response = await apiFetch("/api/prompts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, body, section_id: sectionId }),
@@ -104,7 +105,7 @@ export const usePromptStore = create<PromptState>((set, get) => ({
   },
 
   updatePrompt: async (id: string, title: string, body: string) => {
-    const response = await fetch(`/api/prompts/${id}`, {
+    const response = await apiFetch(`/api/prompts/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, body }),
@@ -126,7 +127,7 @@ export const usePromptStore = create<PromptState>((set, get) => ({
   },
 
   deletePrompt: async (id: string) => {
-    const response = await fetch(`/api/prompts/${id}`, {
+    const response = await apiFetch(`/api/prompts/${id}`, {
       method: "DELETE",
     });
 

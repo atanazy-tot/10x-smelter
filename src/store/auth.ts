@@ -5,6 +5,8 @@
 import { create } from "zustand";
 import type { AuthState } from "./types";
 import type { UsageDTO, SessionDTO } from "@/types";
+import { apiFetch } from "@/lib/utils/api-client";
+import { clearTokens } from "@/lib/utils/token-storage";
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -24,10 +26,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await apiFetch("/api/auth/logout", { method: "POST" });
     } catch {
       // Ignore logout errors
     }
+    clearTokens();
     set({
       user: null,
       isAuthenticated: false,
@@ -39,7 +42,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshUsage: async () => {
     try {
-      const response = await fetch("/api/usage");
+      const response = await apiFetch("/api/usage");
       if (response.ok) {
         const usage: UsageDTO = await response.json();
         set({ usage });
@@ -53,7 +56,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       // Fetch session and usage in parallel
-      const [sessionRes, usageRes] = await Promise.all([fetch("/api/auth/session"), fetch("/api/usage")]);
+      const [sessionRes, usageRes] = await Promise.all([apiFetch("/api/auth/session"), apiFetch("/api/usage")]);
 
       if (sessionRes.ok) {
         const session: SessionDTO = await sessionRes.json();
@@ -63,6 +66,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             isAuthenticated: true,
           });
         } else {
+          // Not authenticated - clear any stale tokens
+          clearTokens();
           set({
             user: null,
             isAuthenticated: false,

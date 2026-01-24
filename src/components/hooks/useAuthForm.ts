@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import type { AuthMode, AuthFormError, AuthFormState } from "@/components/auth/types";
+import type { AuthResponseDTO } from "@/types";
+import { saveTokens } from "@/lib/utils/token-storage";
 
 const validateForm = (mode: AuthMode, email: string, password: string): AuthFormError | null => {
   if (!email.trim()) {
@@ -68,17 +70,19 @@ export function useAuthForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     })
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
-          return response.json().then((data) => {
-            const error: AuthFormError = data.error || {
-              code: "unknown_error",
-              message: "SOMETHING WENT WRONG. TRY AGAIN",
-            };
-            setState((prev) => ({ ...prev, isSubmitting: false, error }));
-          });
+          const data = await response.json();
+          const error: AuthFormError = data.error || {
+            code: "unknown_error",
+            message: "SOMETHING WENT WRONG. TRY AGAIN",
+          };
+          setState((prev) => ({ ...prev, isSubmitting: false, error }));
+          return;
         }
-        // Success - redirect to home using location.assign to avoid react-compiler issues
+        // Success - save tokens and redirect to home
+        const data: AuthResponseDTO = await response.json();
+        saveTokens(data.session);
         globalThis.location.assign("/");
       })
       .catch(() => {
