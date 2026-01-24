@@ -4,7 +4,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { useInputStore, useProcessingStore, useAuthStore, usePromptStore } from "@/store";
+import { useInputStore, useProcessingStore, useAuthStore } from "@/store";
 
 interface ProcessButtonProps {
   className?: string;
@@ -21,30 +21,21 @@ export function ProcessButton({ className }: ProcessButtonProps) {
   const status = useProcessingStore((state) => state.status);
   const startProcessing = useProcessingStore((state) => state.startProcessing);
   const usage = useAuthStore((state) => state.usage);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const hasSelection = usePromptStore((state) => state.hasSelection);
 
   const isProcessing = status === "processing";
-  // Anonymous users don't need to select a prompt (auto-summarize)
-  const needsPrompt = isAuthenticated && !hasSelection();
+  // Prompt selection is optional - if none selected, basic transcript output is used
   // Check both input state and credits
   const hasCredits = usage?.can_process ?? false;
-  const isDisabled = !canProcess || !hasCredits || isProcessing || needsPrompt;
+  const isDisabled = !canProcess || !hasCredits || isProcessing;
 
   // Determine button state message
   let disabledReason = "";
-  if (needsPrompt) {
-    disabledReason = "SELECT A PROMPT";
-  } else if (!usage?.can_process) {
+  if (!usage?.can_process) {
     disabledReason = "NO CREDITS";
   }
 
   const handleClick = () => {
     if (!isDisabled) {
-      // For anonymous users, auto-select summarize before processing
-      if (!isAuthenticated) {
-        usePromptStore.getState().togglePredefinedPrompt("summarize");
-      }
       startProcessing();
     }
   };
