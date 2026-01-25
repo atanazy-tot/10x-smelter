@@ -146,6 +146,8 @@ export interface PromptState {
   createSection: (title: string) => Promise<PromptSectionWithCountDTO>;
   updateSection: (id: string, title: string) => Promise<PromptSectionWithCountDTO>;
   deleteSection: (id: string) => Promise<void>;
+  // Drag and drop
+  movePromptToSection: (promptId: string, sectionId: string | null) => Promise<void>;
 }
 
 export interface ProcessingState {

@@ -4,11 +4,11 @@
 
 Smelts are the core processing operations of the application. Users upload audio files or text, select prompts, and receive processed transcripts/summaries. This is the most complex API due to multipart handling, credit management, and async processing.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/smelts` | POST | Create new smelt (multipart) |
-| `/api/smelts/:id` | GET | Get smelt status/results |
-| `/api/smelts` | GET | List user's smelt history |
+| Endpoint          | Method | Description                  |
+| ----------------- | ------ | ---------------------------- |
+| `/api/smelts`     | POST   | Create new smelt (multipart) |
+| `/api/smelts/:id` | GET    | Get smelt status/results     |
+| `/api/smelts`     | GET    | List user's smelt history    |
 
 ---
 
@@ -62,9 +62,26 @@ Smelts are the core processing operations of the application. Users upload audio
 // Enums
 type SmeltStatus = "pending" | "validating" | "decoding" | "transcribing" | "synthesizing" | "completed" | "failed";
 type SmeltMode = "separate" | "combine";
-type SmeltErrorCode = "file_too_large" | "invalid_format" | "duration_exceeded" | "corrupted_file" | "transcription_failed" | "synthesis_failed" | "api_rate_limited" | "api_quota_exhausted" | "api_key_invalid" | "connection_lost" | "internal_error";
+type SmeltErrorCode =
+  | "file_too_large"
+  | "invalid_format"
+  | "duration_exceeded"
+  | "corrupted_file"
+  | "transcription_failed"
+  | "synthesis_failed"
+  | "api_rate_limited"
+  | "api_quota_exhausted"
+  | "api_key_invalid"
+  | "connection_lost"
+  | "internal_error";
 type SmeltFileStatus = "pending" | "processing" | "completed" | "failed";
-type SmeltFileErrorCode = "file_too_large" | "invalid_format" | "duration_exceeded" | "corrupted_file" | "transcription_failed" | "decoding_failed";
+type SmeltFileErrorCode =
+  | "file_too_large"
+  | "invalid_format"
+  | "duration_exceeded"
+  | "corrupted_file"
+  | "transcription_failed"
+  | "decoding_failed";
 type InputType = "audio" | "text";
 type DefaultPromptName = "summarize" | "action_items" | "detailed_notes" | "qa_format" | "table_of_contents";
 
@@ -115,9 +132,15 @@ interface SmeltCreateResponseDTO {
 }
 
 // State-based DTOs
-interface SmeltProcessingDTO { /* processing state */ }
-interface SmeltCompletedDTO { /* completed with results */ }
-interface SmeltFailedDTO { /* failed with error */ }
+interface SmeltProcessingDTO {
+  /* processing state */
+}
+interface SmeltCompletedDTO {
+  /* completed with results */
+}
+interface SmeltFailedDTO {
+  /* failed with error */
+}
 type SmeltDTO = SmeltProcessingDTO | SmeltCompletedDTO | SmeltFailedDTO;
 
 // List item DTO
@@ -149,14 +172,14 @@ import { z } from "zod";
 
 // Valid audio MIME types
 const VALID_AUDIO_TYPES = [
-  "audio/mpeg",       // MP3
-  "audio/mp3",        // MP3 alternative
-  "audio/wav",        // WAV
-  "audio/wave",       // WAV alternative
-  "audio/x-wav",      // WAV alternative
-  "audio/mp4",        // M4A
-  "audio/x-m4a",      // M4A alternative
-  "audio/m4a",        // M4A alternative
+  "audio/mpeg", // MP3
+  "audio/mp3", // MP3 alternative
+  "audio/wav", // WAV
+  "audio/wave", // WAV alternative
+  "audio/x-wav", // WAV alternative
+  "audio/mp4", // M4A
+  "audio/x-m4a", // M4A alternative
+  "audio/m4a", // M4A alternative
 ];
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
@@ -238,6 +261,7 @@ export { MAX_FILE_SIZE, MAX_FILES, MAX_DURATION_SECONDS, VALID_AUDIO_TYPES };
 ### POST /api/smelts
 
 **Success (201 Created)**:
+
 ```json
 {
   "id": "uuid",
@@ -280,6 +304,7 @@ export { MAX_FILE_SIZE, MAX_FILES, MAX_DURATION_SECONDS, VALID_AUDIO_TYPES };
 ### GET /api/smelts/:id
 
 **Success - Processing (200 OK)**:
+
 ```json
 {
   "id": "uuid",
@@ -299,6 +324,7 @@ export { MAX_FILE_SIZE, MAX_FILES, MAX_DURATION_SECONDS, VALID_AUDIO_TYPES };
 ```
 
 **Success - Completed (200 OK)**:
+
 ```json
 {
   "id": "uuid",
@@ -320,6 +346,7 @@ export { MAX_FILE_SIZE, MAX_FILES, MAX_DURATION_SECONDS, VALID_AUDIO_TYPES };
 ```
 
 **Success - Failed (200 OK)**:
+
 ```json
 {
   "id": "uuid",
@@ -336,6 +363,7 @@ export { MAX_FILE_SIZE, MAX_FILES, MAX_DURATION_SECONDS, VALID_AUDIO_TYPES };
 ### GET /api/smelts
 
 **Success (200 OK)**:
+
 ```json
 {
   "smelts": [
@@ -495,17 +523,17 @@ function buildCreditError(userType: "anonymous" | "authenticated"): {
 
 ### Processing Error Codes
 
-| Error Code | HTTP Status | User Message |
-|------------|-------------|--------------|
-| `file_too_large` | 400 | FILE TOO CHUNKY. MAX 25MB |
-| `invalid_format` | 400 | CAN'T READ THAT. TRY .MP3 .WAV .M4A |
-| `duration_exceeded` | 400 | AUDIO TOO LONG. MAX 30 MINUTES |
-| `corrupted_file` | 422 | CORRUPTED FILE. TRY A DIFFERENT ONE |
-| `transcription_failed` | 500 | TRANSCRIPTION FAILED. TRY AGAIN |
-| `synthesis_failed` | 500 | PROCESSING FAILED. TRY AGAIN |
-| `api_rate_limited` | 429 | RATE LIMITED. TRY AGAIN IN {seconds} SECONDS |
-| `api_quota_exhausted` | 402 | API QUOTA EXHAUSTED |
-| `api_key_invalid` | 401 | API KEY INVALID |
+| Error Code             | HTTP Status | User Message                                 |
+| ---------------------- | ----------- | -------------------------------------------- |
+| `file_too_large`       | 400         | FILE TOO CHUNKY. MAX 25MB                    |
+| `invalid_format`       | 400         | CAN'T READ THAT. TRY .MP3 .WAV .M4A          |
+| `duration_exceeded`    | 400         | AUDIO TOO LONG. MAX 30 MINUTES               |
+| `corrupted_file`       | 422         | CORRUPTED FILE. TRY A DIFFERENT ONE          |
+| `transcription_failed` | 500         | TRANSCRIPTION FAILED. TRY AGAIN              |
+| `synthesis_failed`     | 500         | PROCESSING FAILED. TRY AGAIN                 |
+| `api_rate_limited`     | 429         | RATE LIMITED. TRY AGAIN IN {seconds} SECONDS |
+| `api_quota_exhausted`  | 402         | API QUOTA EXHAUSTED                          |
+| `api_key_invalid`      | 401         | API KEY INVALID                              |
 
 ---
 
@@ -541,8 +569,14 @@ function buildCreditError(userType: "anonymous" | "authenticated"): {
 import { z } from "zod";
 
 const VALID_AUDIO_TYPES = [
-  "audio/mpeg", "audio/mp3", "audio/wav", "audio/wave",
-  "audio/x-wav", "audio/mp4", "audio/x-m4a", "audio/m4a",
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/wav",
+  "audio/wave",
+  "audio/x-wav",
+  "audio/mp4",
+  "audio/x-m4a",
+  "audio/m4a",
 ];
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
@@ -550,7 +584,11 @@ const MAX_FILES = 5;
 const MAX_DURATION_SECONDS = 30 * 60;
 
 export const defaultPromptNameSchema = z.enum([
-  "summarize", "action_items", "detailed_notes", "qa_format", "table_of_contents",
+  "summarize",
+  "action_items",
+  "detailed_notes",
+  "qa_format",
+  "table_of_contents",
 ]);
 
 export const smeltModeSchema = z.enum(["separate", "combine"]);
@@ -572,7 +610,10 @@ export function validateAudioFile(file: File): {
   }
   if (file.size > MAX_FILE_SIZE) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-    return { valid: false, error: { code: "file_too_large", message: `FILE TOO CHUNKY. MAX 25MB. YOUR FILE: ${sizeMB}MB` } };
+    return {
+      valid: false,
+      error: { code: "file_too_large", message: `FILE TOO CHUNKY. MAX 25MB. YOUR FILE: ${sizeMB}MB` },
+    };
   }
   return { valid: true };
 }
@@ -600,13 +641,7 @@ export { MAX_FILE_SIZE, MAX_FILES, MAX_DURATION_SECONDS };
 
 ```typescript
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  SmeltCreateResponseDTO,
-  SmeltDTO,
-  SmeltsListDTO,
-  SmeltFileDTO,
-  DefaultPromptName,
-} from "@/types";
+import type { SmeltCreateResponseDTO, SmeltDTO, SmeltsListDTO, SmeltFileDTO, DefaultPromptName } from "@/types";
 import type { SmeltCreateInput, ListSmeltsQuery } from "@/lib/schemas/smelts.schema";
 import { createHash } from "crypto";
 
@@ -758,10 +793,12 @@ export class SmeltsService {
   async getSmelt(userId: string, smeltId: string): Promise<SmeltDTO> {
     const { data: smelt, error } = await this.supabase
       .from("smelts")
-      .select(`
+      .select(
+        `
         *,
         smelt_files(*)
-      `)
+      `
+      )
       .eq("id", smeltId)
       .eq("user_id", userId)
       .single();
@@ -825,7 +862,8 @@ export class SmeltsService {
 
     let queryBuilder = this.supabase
       .from("smelts")
-      .select(`
+      .select(
+        `
         id,
         status,
         mode,
@@ -833,7 +871,9 @@ export class SmeltsService {
         created_at,
         completed_at,
         smelt_files(count)
-      `, { count: "exact" })
+      `,
+        { count: "exact" }
+      )
       .eq("user_id", userId);
 
     if (status) {
@@ -929,20 +969,12 @@ export class SmeltsService {
       .single();
 
     if (usage && usage.smelts_used >= 1) {
-      throw new SmeltLimitError(
-        "daily_limit",
-        "DAILY LIMIT HIT. SIGN UP FOR 5/WEEK OR ADD YOUR API KEY FOR UNLIMITED"
-      );
+      throw new SmeltLimitError("daily_limit", "DAILY LIMIT HIT. SIGN UP FOR 5/WEEK OR ADD YOUR API KEY FOR UNLIMITED");
     }
   }
 
   private async verifyPromptOwnership(userId: string, promptId: string): Promise<void> {
-    const { data } = await this.supabase
-      .from("prompts")
-      .select("id")
-      .eq("id", promptId)
-      .eq("user_id", userId)
-      .single();
+    const { data } = await this.supabase.from("prompts").select("id").eq("id", promptId).eq("user_id", userId).single();
 
     if (!data) {
       throw new PromptNotFoundError();
@@ -982,14 +1014,20 @@ export class SmeltsService {
 
 // Custom errors
 export class SmeltValidationError extends Error {
-  constructor(public code: string, message: string) {
+  constructor(
+    public code: string,
+    message: string
+  ) {
     super(message);
     this.name = "SmeltValidationError";
   }
 }
 
 export class SmeltLimitError extends Error {
-  constructor(public code: string, message: string) {
+  constructor(
+    public code: string,
+    message: string
+  ) {
     super(message);
     this.name = "SmeltLimitError";
   }
@@ -1022,25 +1060,23 @@ import {
   SmeltLimitError,
   PromptNotFoundError,
 } from "@/lib/services/smelts.service";
-import {
-  smeltCreateSchema,
-  validateAudioFile,
-  listSmeltsQuerySchema,
-  MAX_FILES,
-} from "@/lib/schemas/smelts.schema";
+import { smeltCreateSchema, validateAudioFile, listSmeltsQuerySchema, MAX_FILES } from "@/lib/schemas/smelts.schema";
 
 export const prerender = false;
 
 export async function POST(context: APIContext) {
   try {
     // Get user (may be null for anonymous)
-    const { data: { user } } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await context.locals.supabase.auth.getUser();
     const userId = user?.id ?? null;
 
     // Get client IP
-    const clientIp = context.request.headers.get("x-forwarded-for")?.split(",")[0]
-      ?? context.request.headers.get("x-real-ip")
-      ?? "unknown";
+    const clientIp =
+      context.request.headers.get("x-forwarded-for")?.split(",")[0] ??
+      context.request.headers.get("x-real-ip") ??
+      "unknown";
 
     // Parse multipart form data
     const formData = await context.request.formData();
@@ -1056,20 +1092,20 @@ export async function POST(context: APIContext) {
 
     // Validate file count early
     if (files.length > MAX_FILES) {
-      return new Response(
-        JSON.stringify({ error: { code: "too_many_files", message: "MAX 5 FILES ALLOWED" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "too_many_files", message: "MAX 5 FILES ALLOWED" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Validate each file
     for (const file of files) {
       const validation = validateAudioFile(file);
       if (!validation.valid) {
-        return new Response(
-          JSON.stringify({ error: validation.error }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: validation.error }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
       }
     }
 
@@ -1099,24 +1135,24 @@ export async function POST(context: APIContext) {
   } catch (error) {
     if (error instanceof SmeltValidationError) {
       const status = error.code === "unauthorized" ? 401 : 400;
-      return new Response(
-        JSON.stringify({ error: { code: error.code, message: error.message } }),
-        { status, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: error.code, message: error.message } }), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     if (error instanceof SmeltLimitError) {
-      return new Response(
-        JSON.stringify({ error: { code: error.code, message: error.message } }),
-        { status: 403, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: error.code, message: error.message } }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     if (error instanceof PromptNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "prompt_not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "prompt_not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Create smelt error:", error);
@@ -1129,13 +1165,16 @@ export async function POST(context: APIContext) {
 
 export async function GET(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const url = new URL(context.request.url);
@@ -1148,12 +1187,14 @@ export async function GET(context: APIContext) {
     };
 
     const validation = listSmeltsQuerySchema.safeParse(queryParams);
-    const query = validation.success ? validation.data : {
-      sort: "created_at" as const,
-      order: "desc" as const,
-      page: 1,
-      limit: 20,
-    };
+    const query = validation.success
+      ? validation.data
+      : {
+          sort: "created_at" as const,
+          order: "desc" as const,
+          page: 1,
+          limit: 20,
+        };
 
     const service = new SmeltsService(context.locals.supabase);
     const result = await service.listSmelts(user.id, query);
@@ -1183,21 +1224,24 @@ export const prerender = false;
 
 export async function GET(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const paramValidation = uuidParamSchema.safeParse({ id: context.params.id });
     if (!paramValidation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "SMELT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "SMELT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new SmeltsService(context.locals.supabase);
@@ -1209,10 +1253,10 @@ export async function GET(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof SmeltNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "SMELT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "SMELT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Get smelt error:", error);

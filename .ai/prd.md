@@ -9,12 +9,14 @@ The product originated from a real need during hackathons: participants wanted t
 The MVP focuses on simplicity and speed, offering a straightforward interface where users can drop files, select a processing prompt, and receive clean Markdown output within minutes. The application employs a neobrutalist design aesthetic - bold, high-contrast, and deliberately minimal.
 
 Target Users:
+
 - Students recording and summarizing lectures
 - Professionals transcribing meeting recordings
 - Journalists creating interview transcripts
 - Content creators organizing brainstorming sessions
 
 Key Differentiators:
+
 - Privacy-first approach with no server-side file storage
 - Customizable prompt library for personalized output formats
 - Multi-file combination for coherent notes from multiple sources
@@ -37,6 +39,7 @@ Users face several pain points when trying to convert recorded discussions or me
 6. Output Customization: Different use cases require different output formats (meeting summaries vs. detailed transcripts vs. action item lists), but most tools offer only one style.
 
 SMELT solves these problems by providing:
+
 - A fast, simple interface requiring no technical knowledge
 - AI-powered transcription and structuring in minutes
 - Customizable prompts for different output styles
@@ -50,16 +53,19 @@ SMELT solves these problems by providing:
 The application must accept audio files and text input through a drag-and-drop interface or manual selection.
 
 Supported Formats:
+
 - Audio: MP3, WAV, M4A
 - Text: Direct paste into text area
 
 File Constraints:
+
 - Maximum file size: 25MB per file
 - Maximum audio duration: 30 minutes
 - Maximum concurrent files: 5 files
 - Files requiring format conversion (M4A) are converted server-side using temporary storage with immediate cleanup
 
 Input Methods:
+
 - Drag-and-drop zone for file upload
 - Click-to-browse file selector
 - Direct text paste area
@@ -70,12 +76,14 @@ Input Methods:
 The application supports two processing modes with different availability based on user authentication status.
 
 Separate Mode:
+
 - Processes each file individually
 - Each file receives its own result
 - Available to all users (anonymous and logged-in)
 - Anonymous users can only use this mode
 
 Combine Mode:
+
 - Available only to logged-in users
 - Processes multiple files into a single coherent output
 - Transcribes all files in parallel
@@ -89,12 +97,14 @@ Combine Mode:
 The application provides predefined prompts and allows logged-in users to create custom prompts.
 
 Predefined Prompts:
+
 - 5 default prompts available to all users
 - Displayed near the process button (above or below upload area)
 - Cannot be edited or deleted
 - Provide common use cases (summarization, action items, detailed notes, Q&A format, table of contents)
 
 Custom Prompts (Logged-in Users Only):
+
 - Unlimited custom prompts per user
 - Two creation methods: upload .MD file or create from scratch
 - Maximum prompt length: 4,000 characters
@@ -105,6 +115,7 @@ Custom Prompts (Logged-in Users Only):
 - Displayed in sidebar prompt library
 
 Prompt Constraints:
+
 - .MD files larger than 10KB rejected with error message
 - Character counter displayed during editing
 - Only prompt text exposed (no advanced parameters like temperature or model selection)
@@ -114,6 +125,7 @@ Prompt Constraints:
 The application implements a tiered usage system based on authentication status and API key configuration.
 
 Anonymous Users:
+
 - 1 free smelt per day
 - Tracked by IP address
 - Can only use predefined prompts
@@ -121,6 +133,7 @@ Anonymous Users:
 - Daily limit resets at midnight UTC
 
 Logged-in Users:
+
 - 5 free smelts per week
 - Weekly limit resets every Monday at midnight UTC
 - Access to custom prompt library
@@ -128,6 +141,7 @@ Logged-in Users:
 - Usage counter visible in header with color coding (lime = available, coral = limit reached)
 
 Power Users (Own API Key):
+
 - Unlimited processing
 - Must provide valid OpenAI API key
 - API key validated before saving
@@ -135,11 +149,13 @@ Power Users (Own API Key):
 - Usage counter displays "UNLIMITED"
 
 Credit Consumption Rules:
+
 - One completed smelting operation = one credit
 - Failed processing attempts do not consume credits
 - Credits are consumed per successful operation (per user-initiated run), regardless of mode or file count
 
 Pre-flight Checks:
+
 - System validates sufficient credits before processing
 - Clear error messages when limits exceeded
 - Call-to-action prompts for account creation or API key addition
@@ -149,16 +165,19 @@ Pre-flight Checks:
 User authentication is handled through a third-party authentication service.
 
 Anonymous Access:
+
 - No account required for basic usage
 - IP-based rate limiting
 - No data persistence (ephemeral session)
 
 Account Creation:
+
 - Required for custom prompts and increased weekly limits
 - Authentication handled by external service
 - Minimal user data collection
 
 User Profile:
+
 - API key storage (encrypted)
 - Custom prompt library
 - Usage statistics (credits remaining, reset date)
@@ -169,18 +188,21 @@ User Profile:
 File processing occurs in real-time with continuous progress updates.
 
 Processing Flow:
+
 1. File validation (format, size, duration)
 2. Audio transcription via LLM API
 3. Text synthesis using selected prompt
 4. Result delivery
 
 Progress Reporting:
+
 - Real-time progress updates via WebSocket connection
 - Progress bar showing percentage complete
 - Status messages at each stage
 - Multiple file processing shows individual progress
 
 Processing Stages:
+
 - Validating (10%)
 - Decoding (20%)
 - Transcribing (30-70%)
@@ -192,16 +214,19 @@ Processing Stages:
 Processing results are displayed immediately with export options.
 
 Display Format:
+
 - Scrollable text block with Markdown formatting
 - Clean, readable presentation
 - No metadata (word count, tokens, processing time) in MVP
 
 Export Options:
+
 - Copy to clipboard button
 - Download as .MD file
 - File naming convention includes timestamp or source file name
 
 Data Persistence:
+
 - Results are ephemeral (not saved server-side)
 - Refreshing page clears all results
 - Users must download to preserve output
@@ -212,6 +237,7 @@ Data Persistence:
 The application provides clear, actionable error messages in a consistent tone.
 
 Error Categories:
+
 - File validation errors (size, format, duration)
 - Processing errors (transcription failed, API errors)
 - Authentication errors (invalid credentials, session expired)
@@ -219,12 +245,14 @@ Error Categories:
 - API key errors (invalid, quota exhausted)
 
 Error Message Tone:
+
 - Neobrutalist style (direct, bold, no apologetic language)
 - All caps for emphasis
 - Clear indication of the problem
 - Actionable next steps where applicable
 
 Examples:
+
 - "FILE TOO CHUNKY. MAX 25MB."
 - "DAILY LIMIT HIT. SIGN UP FOR 5/WEEK OR ADD YOUR API KEY FOR UNLIMITED."
 - "PROMPT TOO LONG. KEEP IT UNDER 4,000 CHARS."
@@ -235,18 +263,21 @@ Examples:
 The application implements a privacy-first architecture.
 
 File Handling:
+
 - Files processed in memory when possible
 - Temporary disk storage only for format conversion
 - Immediate deletion after processing
 - No permanent server-side file storage
 
 User Data:
+
 - Minimal data collection (email, usage statistics)
 - Custom prompts stored with user association
 - API keys stored encrypted
 - No tracking of file content or results
 
 Privacy Messaging:
+
 - Clear communication that files are never saved
 - Transparent about temporary processing
 - No analytics on file content
@@ -258,6 +289,7 @@ Privacy Messaging:
 The MVP includes the following features:
 
 User Features:
+
 - Anonymous single-file processing with daily limit
 - User registration and authentication
 - Custom prompt creation, editing, and deletion
@@ -267,6 +299,7 @@ User Features:
 - Copy and download results
 
 Processing Capabilities:
+
 - Audio transcription (MP3, WAV, M4A)
 - Text input processing
 - 5 predefined prompts
@@ -275,6 +308,7 @@ Processing Capabilities:
 - Combined synthesis for multi-file processing
 
 Technical Features:
+
 - Single-page application architecture
 - Real-time WebSocket progress updates
 - Drag-and-drop file upload
@@ -287,6 +321,7 @@ Technical Features:
 The following features are explicitly excluded from the MVP:
 
 Advanced Features:
+
 - Payment processing or paid subscriptions
 - Results history or saved outputs
 - Project management or file organization
@@ -295,6 +330,7 @@ Advanced Features:
 - Prompt versioning or collaboration
 
 Processing Features:
+
 - Additional file formats (images, PDFs, video)
 - Export formats beyond Markdown (PDF, DOCX)
 - Advanced prompt parameters (temperature, max tokens, model selection)
@@ -303,6 +339,7 @@ Processing Features:
 - Scheduled processing
 
 User Experience:
+
 - Onboarding tutorials or tooltips
 - Sample audio files for testing
 - Template prompts or examples in library
@@ -310,12 +347,14 @@ User Experience:
 - Drag-to-reorder prompts or divisors
 
 Integrations:
+
 - Third-party service integrations (Notion, Obsidian, Google Drive)
 - API for external access
 - Webhook notifications
 - Email delivery of results
 
 Advanced Analytics:
+
 - Processing time display
 - Word count or character count
 - Token usage tracking
@@ -327,6 +366,7 @@ Advanced Analytics:
 Features that may be added post-MVP based on user demand:
 
 Phase 2 Candidates:
+
 - Results history with search and organization
 - Additional file format support (PDF, images with OCR)
 - Prompt sharing marketplace
@@ -334,6 +374,7 @@ Phase 2 Candidates:
 - Advanced prompt parameters for power users
 
 Phase 3 Candidates:
+
 - Paid subscription tiers
 - Export format options (PDF, DOCX)
 - Integration with note-taking apps
@@ -345,6 +386,7 @@ Phase 3 Candidates:
 ### 5.1 Authentication and Account Management
 
 US-001: Anonymous Access to Application
+
 - Title: Access SMELT without creating an account
 - Description: As an anonymous visitor, I want to access SMELT and process files without creating an account, so that I can quickly try the service before committing to registration.
 - Acceptance Criteria:
@@ -358,6 +400,7 @@ US-001: Anonymous Access to Application
   - IP address determines daily limit enforcement
 
 US-002: User Registration
+
 - Title: Create a new SMELT account
 - Description: As an anonymous user who has hit my daily limit or wants access to custom prompts, I want to create an account, so that I can access additional features and increased usage limits.
 - Acceptance Criteria:
@@ -370,6 +413,7 @@ US-002: User Registration
   - Combine mode becomes available for multi-file uploads
 
 US-003: User Login
+
 - Title: Log in to existing SMELT account
 - Description: As a registered user, I want to log in to my account, so that I can access my custom prompts and weekly usage allowance.
 - Acceptance Criteria:
@@ -382,6 +426,7 @@ US-003: User Login
   - Session persists across page refreshes
 
 US-004: User Logout
+
 - Title: Log out of SMELT account
 - Description: As a logged-in user, I want to log out of my account, so that I can protect my privacy on shared devices.
 - Acceptance Criteria:
@@ -395,6 +440,7 @@ US-004: User Logout
 ### 5.2 File Upload and Validation
 
 US-005: Upload Single Audio File
+
 - Title: Upload one audio file for processing
 - Description: As a user, I want to drag and drop or select a single audio file, so that I can transcribe and process it.
 - Acceptance Criteria:
@@ -407,6 +453,7 @@ US-005: Upload Single Audio File
   - Selecting file clears any existing text input
 
 US-006: Upload Multiple Audio Files
+
 - Title: Upload multiple audio files for processing
 - Description: As a logged-in user, I want to upload multiple audio files at once, so that I can process them together or separately.
 - Acceptance Criteria:
@@ -419,6 +466,7 @@ US-006: Upload Multiple Audio Files
   - All files validated before processing allowed
 
 US-007: File Size Validation
+
 - Title: Reject files exceeding size limit
 - Description: As a user attempting to upload a large file, I want to receive a clear error message, so that I understand the file size constraint.
 - Acceptance Criteria:
@@ -430,6 +478,7 @@ US-007: File Size Validation
   - Other valid files in multi-file upload remain selected
 
 US-008: File Format Validation
+
 - Title: Reject unsupported file formats
 - Description: As a user attempting to upload an unsupported file type, I want to receive a clear error message, so that I know which formats are accepted.
 - Acceptance Criteria:
@@ -440,6 +489,7 @@ US-008: File Format Validation
   - Supported formats displayed in error message
 
 US-009: Text Input Entry
+
 - Title: Enter text directly for processing
 - Description: As a user with text notes instead of audio, I want to paste text directly, so that I can process it without creating an audio file.
 - Acceptance Criteria:
@@ -453,6 +503,7 @@ US-009: Text Input Entry
 ### 5.3 Prompt Selection and Management
 
 US-011: Select Predefined Prompt
+
 - Title: Choose from available default prompts
 - Description: As any user (anonymous or logged-in), I want to select one of the predefined prompts, so that I can control the output format.
 - Acceptance Criteria:
@@ -465,6 +516,7 @@ US-011: Select Predefined Prompt
   - Default prompt selected if none chosen
 
 US-012: Create Custom Prompt from Scratch
+
 - Title: Write a new custom prompt manually
 - Description: As a logged-in user, I want to create a custom prompt by typing it directly, so that I can define my preferred output format without using a file.
 - Acceptance Criteria:
@@ -479,6 +531,7 @@ US-012: Create Custom Prompt from Scratch
   - Validation prevents saving empty prompts
 
 US-013: Create Custom Prompt from .MD File
+
 - Title: Upload a markdown file as a custom prompt
 - Description: As a logged-in user, I want to upload a .MD file containing my prompt, so that I can quickly import prompts I've created elsewhere.
 - Acceptance Criteria:
@@ -492,6 +545,7 @@ US-013: Create Custom Prompt from .MD File
   - File content validated for character limit
 
 US-014: Edit Custom Prompt Name
+
 - Title: Rename an existing custom prompt
 - Description: As a logged-in user, I want to rename my custom prompts, so that I can keep my library organized with meaningful names.
 - Acceptance Criteria:
@@ -504,6 +558,7 @@ US-014: Edit Custom Prompt Name
   - Prompt content unchanged by rename
 
 US-015: Delete Custom Prompt
+
 - Title: Remove a custom prompt from library
 - Description: As a logged-in user, I want to delete custom prompts I no longer need, so that I can keep my library clean and relevant.
 - Acceptance Criteria:
@@ -515,6 +570,7 @@ US-015: Delete Custom Prompt
   - If deleted prompt was selected, selection reverts to default
 
 US-016: Organize Prompts with Divisors
+
 - Title: Create sections to organize custom prompts
 - Description: As a logged-in user with many custom prompts, I want to create named sections/divisors, so that I can organize my prompts by category.
 - Acceptance Criteria:
@@ -527,6 +583,7 @@ US-016: Organize Prompts with Divisors
   - Sections are purely visual (no functional difference)
 
 US-017: Select Custom Prompt for Processing
+
 - Title: Use a custom prompt instead of predefined ones
 - Description: As a logged-in user, I want to select one of my custom prompts for processing, so that I can use my preferred output format.
 - Acceptance Criteria:
@@ -540,6 +597,7 @@ US-017: Select Custom Prompt for Processing
 ### 5.4 Processing Operations
 
 US-018: Process Single File in Separate Mode
+
 - Title: Transcribe and process one audio file
 - Description: As any user, I want to process a single audio file with my selected prompt, so that I can receive clean markdown notes.
 - Acceptance Criteria:
@@ -554,6 +612,7 @@ US-018: Process Single File in Separate Mode
   - One credit consumed upon successful completion
 
 US-019: Process Multiple Files in Separate Mode
+
 - Title: Process each file individually
 - Description: As any user, I want to process multiple files separately, so that I receive individual results for each file.
 - Acceptance Criteria:
@@ -567,6 +626,7 @@ US-019: Process Multiple Files in Separate Mode
   - Anonymous users cannot use this with multiple files (only logged-in)
 
 US-020: Process Multiple Files in Combine Mode
+
 - Title: Combine multiple files into single output
 - Description: As a logged-in user, I want to combine multiple audio files into one coherent document, so that I get unified notes from multi-part recordings.
 - Acceptance Criteria:
@@ -582,6 +642,7 @@ US-020: Process Multiple Files in Combine Mode
   - Maximum 5 files can be combined
 
 US-021: Process Text Input
+
 - Title: Process pasted text with selected prompt
 - Description: As any user, I want to process text I've pasted, so that I can clean up and structure written notes.
 - Acceptance Criteria:
@@ -595,6 +656,7 @@ US-021: Process Text Input
   - One credit consumed upon successful completion
 
 US-022: View Real-Time Processing Progress
+
 - Title: Monitor processing status while waiting
 - Description: As a user who initiated processing, I want to see real-time progress updates, so that I know the system is working and estimate completion time.
 - Acceptance Criteria:
@@ -608,6 +670,7 @@ US-022: View Real-Time Processing Progress
   - Cancel option available (optional for MVP)
 
 US-023: Handle Processing Errors
+
 - Title: Receive clear error messages when processing fails
 - Description: As a user whose processing failed, I want to understand what went wrong, so that I can take corrective action.
 - Acceptance Criteria:
@@ -622,6 +685,7 @@ US-023: Handle Processing Errors
 ### 5.5 Results and Export
 
 US-024: View Processing Results
+
 - Title: See the processed markdown output
 - Description: As a user whose processing completed successfully, I want to view the clean markdown result, so that I can review the output.
 - Acceptance Criteria:
@@ -634,6 +698,7 @@ US-024: View Processing Results
   - Previous results cleared when starting new processing
 
 US-025: Copy Result to Clipboard
+
 - Title: Copy markdown output for pasting elsewhere
 - Description: As a user with completed results, I want to copy the output to my clipboard, so that I can paste it into my notes or documents.
 - Acceptance Criteria:
@@ -645,6 +710,7 @@ US-025: Copy Result to Clipboard
   - No selection required before copying
 
 US-026: Download Result as .MD File
+
 - Title: Save markdown output as a file
 - Description: As a user with completed results, I want to download the output as a markdown file, so that I can save it permanently to my device.
 - Acceptance Criteria:
@@ -657,6 +723,7 @@ US-026: Download Result as .MD File
   - Multiple results produce multiple download options
 
 US-027: Clear Results and Start New Processing
+
 - Title: Reset interface for new processing task
 - Description: As a user who has finished with current results, I want to clear the interface and start fresh, so that I can process new files.
 - Acceptance Criteria:
@@ -671,6 +738,7 @@ US-027: Clear Results and Start New Processing
 ### 5.6 Usage Limits and Credit Management
 
 US-028: Track Anonymous Daily Usage
+
 - Title: Enforce one smelt per day for anonymous users
 - Description: As an anonymous user, I want to understand my usage limit, so that I know when I can process again or need to create an account.
 - Acceptance Criteria:
@@ -684,6 +752,7 @@ US-028: Track Anonymous Daily Usage
   - Failed processing attempts do not count against limit
 
 US-029: Track Logged-In Weekly Usage
+
 - Title: Monitor weekly smelt allowance
 - Description: As a logged-in user, I want to see my remaining weekly credits, so that I can plan my usage and know when I need to add an API key.
 - Acceptance Criteria:
@@ -696,6 +765,7 @@ US-029: Track Logged-In Weekly Usage
   - Failed processing does not consume credits
 
 US-030: Handle Exhausted Weekly Limit
+
 - Title: Inform user when weekly credits are depleted
 - Description: As a logged-in user who has used all weekly credits, I want clear information about my options, so that I can continue using the service.
 - Acceptance Criteria:
@@ -708,6 +778,7 @@ US-030: Handle Exhausted Weekly Limit
   - Message persists until credits available
 
 US-031: Pre-Flight Credit Check
+
 - Title: Validate sufficient credits before processing
 - Description: As a user attempting to process files, I want the system to check credit availability before starting, so that I don't waste time on a process that will fail.
 - Acceptance Criteria:
@@ -722,6 +793,7 @@ US-031: Pre-Flight Credit Check
 ### 5.7 API Key Management
 
 US-032: Add OpenAI API Key
+
 - Title: Configure personal API key for unlimited usage
 - Description: As a logged-in user who wants unlimited processing, I want to add my OpenAI API key, so that I can bypass weekly limits.
 - Acceptance Criteria:
@@ -737,6 +809,7 @@ US-032: Add OpenAI API Key
   - Key used for all subsequent processing
 
 US-033: Remove API Key
+
 - Title: Delete saved API key and return to free tier
 - Description: As a user with a configured API key, I want to remove it, so that I can revert to the free tier or use a different key.
 - Acceptance Criteria:
@@ -749,6 +822,7 @@ US-033: Remove API Key
   - Can add different key after removal
 
 US-034: Process with Personal API Key
+
 - Title: Use own API key for unlimited processing
 - Description: As a user with a valid API key configured, I want all processing to use my key, so that I can process unlimited files without weekly restrictions.
 - Acceptance Criteria:
@@ -763,6 +837,7 @@ US-034: Process with Personal API Key
 ### 5.8 Edge Cases and Error Scenarios
 
 US-035: Handle Corrupted Audio File
+
 - Title: Detect and report unprocessable audio files
 - Description: As a user who uploaded a corrupted audio file, I want a clear error message, so that I understand the file cannot be processed.
 - Acceptance Criteria:
@@ -774,6 +849,7 @@ US-035: Handle Corrupted Audio File
   - Other files in multi-file upload continue processing (separate mode)
 
 US-036: Handle Partial Failure in Combine Mode
+
 - Title: Require all files to succeed for combine mode
 - Description: As a logged-in user processing multiple files in combine mode, I want to know if any file fails, so that I can fix the issue and reprocess all files together.
 - Acceptance Criteria:
@@ -785,6 +861,7 @@ US-036: Handle Partial Failure in Combine Mode
   - Clear indication of which file caused failure
 
 US-037: Handle WebSocket Connection Loss
+
 - Title: Manage connection interruption during processing
 - Description: As a user whose connection drops during processing, I want to know what happened, so that I can retry if needed.
 - Acceptance Criteria:
@@ -796,6 +873,7 @@ US-037: Handle WebSocket Connection Loss
   - Automatic reconnection attempted (optional)
 
 US-038: Handle Empty Text Input
+
 - Title: Prevent processing of empty text
 - Description: As a user who accidentally clicked process with empty text input, I want a clear error, so that I understand text is required.
 - Acceptance Criteria:
@@ -807,6 +885,7 @@ US-038: Handle Empty Text Input
   - User can enter text and retry
 
 US-039: Handle Simultaneous Multi-User Load
+
 - Title: Process files reliably under high concurrent load
 - Description: As a user during peak usage times, I want my files to process successfully, so that I receive results even when many users are active.
 - Acceptance Criteria:
@@ -819,6 +898,7 @@ US-039: Handle Simultaneous Multi-User Load
   - Error messages guide users to retry
 
 US-040: Handle API Rate Limiting
+
 - Title: Manage third-party API rate limits gracefully
 - Description: As a user when the system hits OpenAI rate limits, I want to understand the issue, so that I know it's temporary and can retry later.
 - Acceptance Criteria:
@@ -833,6 +913,7 @@ US-040: Handle API Rate Limiting
 ### 5.9 Mobile and Responsive Design
 
 US-041: Use SMELT on Mobile Device
+
 - Title: Access and use application on smartphone or tablet
 - Description: As a mobile user, I want to use SMELT on my phone, so that I can process files on the go.
 - Acceptance Criteria:
@@ -847,6 +928,7 @@ US-041: Use SMELT on Mobile Device
   - Sidebar/library accessible (drawer or bottom sheet)
 
 US-042: Upload File from Mobile Camera Roll
+
 - Title: Select audio file from mobile device storage
 - Description: As a mobile user, I want to upload audio files from my phone, so that I can process voice memos and recordings.
 - Acceptance Criteria:
@@ -861,6 +943,7 @@ US-042: Upload File from Mobile Camera Roll
 ### 5.10 Accessibility and Usability
 
 US-043: Navigate Interface with Keyboard
+
 - Title: Use SMELT without mouse or touch input
 - Description: As a keyboard-only user, I want to navigate and use all features via keyboard, so that I can access the application without pointing devices.
 - Acceptance Criteria:
@@ -874,6 +957,7 @@ US-043: Navigate Interface with Keyboard
   - No keyboard traps
 
 US-044: Use SMELT with Screen Reader
+
 - Title: Access application with assistive technology
 - Description: As a screen reader user, I want proper semantic markup and labels, so that I can understand and use the interface.
 - Acceptance Criteria:
@@ -891,6 +975,7 @@ US-044: Use SMELT with Screen Reader
 ### 6.1 Product-Market Fit Indicators
 
 Weekly Active Users (WAU)
+
 - Target: 100 WAU within 3 months of launch
 - Definition: Unique users who complete at least one smelt per week
 - Measurement: Query database for distinct users with successful processing in rolling 7-day window
@@ -898,6 +983,7 @@ Weekly Active Users (WAU)
 - Data Source: User activity logs
 
 7-Day Retention Rate
+
 - Target: 60% of new users return within 7 days
 - Definition: Percentage of new users who return to process files within one week of first use
 - Measurement: Cohort analysis tracking user first visit and subsequent visits within 7 days
@@ -905,6 +991,7 @@ Weekly Active Users (WAU)
 - Data Source: User session tracking
 
 Average Files Processed Per User
+
 - Target: 3 or more files per active user per week
 - Definition: Total smelts divided by weekly active users
 - Measurement: Sum of all processing operations divided by count of active users in week
@@ -912,6 +999,7 @@ Average Files Processed Per User
 - Data Source: Processing completion logs
 
 Custom Prompt Creation Rate
+
 - Target: 40% of logged-in users create at least one custom prompt
 - Definition: Percentage of registered users with one or more custom prompts
 - Measurement: Users with custom_prompts count > 0 divided by total registered users
@@ -921,6 +1009,7 @@ Custom Prompt Creation Rate
 ### 6.2 User Acquisition and Conversion
 
 Free to Registered Conversion Rate
+
 - Target: 20% of anonymous users create accounts
 - Definition: Percentage of anonymous users who sign up after hitting daily limit
 - Measurement: New registrations divided by unique anonymous users who hit limit
@@ -928,6 +1017,7 @@ Free to Registered Conversion Rate
 - Data Source: User registration events and rate limit triggers
 
 API Key Adoption Rate
+
 - Target: 10% of registered users add their own API key
 - Definition: Percentage of logged-in users with valid API key configured
 - Measurement: Users with api_key_status = valid divided by total registered users
@@ -935,6 +1025,7 @@ API Key Adoption Rate
 - Data Source: User profile API key status
 
 Multi-File Combine Mode Usage
+
 - Target: 25% of logged-in processing operations use combine mode
 - Definition: Percentage of multi-file smelts that use combine vs separate mode
 - Measurement: Combine mode operations divided by total multi-file operations
@@ -944,6 +1035,7 @@ Multi-File Combine Mode Usage
 ### 6.3 Technical Performance Metrics
 
 Processing Time (P95)
+
 - Target: 95th percentile processing time under 2 minutes for 10-minute audio
 - Definition: Time from process button click to result delivery for 95% of operations
 - Measurement: Timestamp delta between processing start and completion
@@ -951,6 +1043,7 @@ Processing Time (P95)
 - Data Source: Processing event timestamps
 
 Processing Success Rate
+
 - Target: 95% of processing attempts succeed without errors
 - Definition: Percentage of processing operations that complete successfully
 - Measurement: Successful completions divided by total processing attempts
@@ -959,6 +1052,7 @@ Processing Success Rate
 - Note: Excludes user-caused errors (file too large, invalid format)
 
 WebSocket Connection Stability
+
 - Target: 98% of connections maintain throughout processing
 - Definition: Percentage of processing operations with uninterrupted WebSocket connection
 - Measurement: Operations without connection loss events divided by total operations
@@ -968,6 +1062,7 @@ WebSocket Connection Stability
 ### 6.4 User Satisfaction Signals
 
 Result Download Rate
+
 - Target: 80% or more of completed smelts result in download
 - Definition: Percentage of successful processing operations followed by file download
 - Measurement: Download actions divided by completed processing operations
@@ -975,6 +1070,7 @@ Result Download Rate
 - Data Source: Download button click events
 
 Result Copy Rate
+
 - Target: 60% or more of completed smelts result in copy-to-clipboard
 - Definition: Percentage of successful processing operations followed by copy action
 - Measurement: Copy actions divided by completed processing operations
@@ -982,6 +1078,7 @@ Result Copy Rate
 - Data Source: Copy button click events
 
 Repeat Usage Rate
+
 - Target: 50% of users return for second smelt within 30 days
 - Definition: Percentage of users who complete at least 2 smelts in first month
 - Measurement: Users with 2+ smelts in first 30 days divided by new users
@@ -991,6 +1088,7 @@ Repeat Usage Rate
 ### 6.5 Feature Adoption Metrics
 
 Custom Prompt Usage vs Predefined
+
 - Target: 60% of logged-in smelts use custom prompts after creation
 - Definition: Percentage of processing operations using custom prompts for users who have created them
 - Measurement: Custom prompt selections divided by total selections for users with custom prompts
@@ -998,6 +1096,7 @@ Custom Prompt Usage vs Predefined
 - Data Source: Prompt selection logs
 
 Average Custom Prompts Per User
+
 - Target: 2.5 average custom prompts per user with any custom prompts
 - Definition: Mean number of custom prompts for users who have created at least one
 - Measurement: Total custom prompts divided by users with custom prompts > 0
@@ -1005,6 +1104,7 @@ Average Custom Prompts Per User
 - Data Source: User prompt library records
 
 Prompt Divisor Usage
+
 - Target: 40% of users with 3+ custom prompts use divisors
 - Definition: Percentage of multi-prompt users who organize with sections
 - Measurement: Users with divisors divided by users with 3+ prompts
@@ -1014,6 +1114,7 @@ Prompt Divisor Usage
 ### 6.6 Business and Growth Metrics
 
 Daily Active Users (DAU)
+
 - Target: 30-40 DAU within first month
 - Definition: Unique users who complete at least one smelt on a given day
 - Measurement: Distinct users with successful processing each day
@@ -1021,6 +1122,7 @@ Daily Active Users (DAU)
 - Data Source: Daily user activity aggregation
 
 Weekly Credit Consumption Distribution
+
 - Target: Understand usage patterns across user base
 - Definition: Distribution of users by credits consumed (1-5 range for free tier)
 - Measurement: Histogram of weekly credit usage across all logged-in users
@@ -1028,6 +1130,7 @@ Weekly Credit Consumption Distribution
 - Data Source: Weekly usage summaries
 
 Anonymous vs Logged-In Usage Ratio
+
 - Target: 60% of smelts from logged-in users within 3 months
 - Definition: Percentage of processing operations from authenticated users
 - Measurement: Logged-in smelts divided by total smelts
@@ -1037,6 +1140,7 @@ Anonymous vs Logged-In Usage Ratio
 ### 6.7 Monitoring and Alerts
 
 Critical Error Rate
+
 - Target: Less than 1% of operations fail due to system errors
 - Definition: Processing failures caused by application bugs or infrastructure issues
 - Measurement: System errors divided by total processing attempts
@@ -1045,6 +1149,7 @@ Critical Error Rate
 - Alert: Trigger notification if rate exceeds 2% in any 1-hour window
 
 API Cost Per Smelt
+
 - Target: Track and optimize cost efficiency over time
 - Definition: Average API cost for transcription and synthesis per successful smelt
 - Measurement: Total API costs divided by completed smelts
@@ -1053,6 +1158,7 @@ API Cost Per Smelt
 - Note: Separate tracking for system-provided vs user API key operations
 
 User-Reported Issues
+
 - Target: Less than 5% of users report problems
 - Definition: Percentage of active users who report bugs or issues
 - Measurement: Unique users with support tickets divided by weekly active users
@@ -1064,18 +1170,21 @@ User-Reported Issues
 The MVP will be considered successful if within 3 months of launch:
 
 Must Have (Launch Blockers):
+
 - Processing success rate above 90%
 - Processing time P95 under 3 minutes for 10-minute audio
 - WebSocket stability above 95%
 - Critical error rate below 2%
 
 Should Have (Strong Indicators):
+
 - 100+ weekly active users
 - 60%+ 7-day retention rate
 - 20%+ free-to-registered conversion
 - 80%+ result download rate
 
 Nice to Have (Growth Signals):
+
 - 3+ files processed per active user per week
 - 40%+ custom prompt creation rate
 - 25%+ combine mode usage among logged-in users

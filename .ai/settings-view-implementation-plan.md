@@ -5,6 +5,7 @@
 The Settings view provides authenticated users with a dedicated page to manage their OpenRouter API keys for unlimited processing access. Users can add a new API key, view its validation status, and remove an existing key to revert to the free tier.
 
 The view follows the neobrutalist design aesthetic with:
+
 - Masked API key input with show/hide toggle
 - Real-time validation feedback with color-coded status (mint for valid, coral for invalid)
 - Spinning `@` animation during validation
@@ -12,12 +13,12 @@ The view follows the neobrutalist design aesthetic with:
 
 ## 2. View Routing
 
-| Attribute | Value |
-|-----------|-------|
-| **Path** | `/settings` |
-| **File** | `src/pages/settings.astro` |
+| Attribute         | Value                                          |
+| ----------------- | ---------------------------------------------- |
+| **Path**          | `/settings`                                    |
+| **File**          | `src/pages/settings.astro`                     |
 | **Auth Required** | Yes (redirect to `/auth` if not authenticated) |
-| **Prerender** | `false` (dynamic page) |
+| **Prerender**     | `false` (dynamic page)                         |
 
 ## 3. Component Structure
 
@@ -439,6 +440,7 @@ After successful API key validation or removal, call `useAuthStore.refreshUsage(
 **Purpose**: Fetch current API key status on page load
 
 **Request**:
+
 ```typescript
 const response = await apiFetch("/api/api-keys/status");
 ```
@@ -454,6 +456,7 @@ const response = await apiFetch("/api/api-keys/status");
 ```
 
 **Error Handling**:
+
 - 401: Redirect to `/auth`
 
 ---
@@ -463,6 +466,7 @@ const response = await apiFetch("/api/api-keys/status");
 **Purpose**: Validate and store a new API key
 
 **Request**:
+
 ```typescript
 const response = await apiFetch("/api/api-keys", {
   method: "POST",
@@ -495,6 +499,7 @@ const response = await apiFetch("/api/api-keys", {
 **Purpose**: Remove stored API key
 
 **Request**:
+
 ```typescript
 const response = await apiFetch("/api/api-keys", {
   method: "DELETE",
@@ -516,6 +521,7 @@ const response = await apiFetch("/api/api-keys", {
 ## 8. User Interactions
 
 ### 8.1 Page Load
+
 1. Show loading state ("LOADING...")
 2. Check authentication status via `/api/auth/session`
 3. If not authenticated, redirect to `/auth`
@@ -523,16 +529,19 @@ const response = await apiFetch("/api/api-keys", {
 5. Display current status and appropriate form/buttons
 
 ### 8.2 Enter API Key
+
 1. User types in masked input field
 2. Input updates local state
 3. Validate button enables when input is non-empty
 
 ### 8.3 Toggle Key Visibility
+
 1. User clicks eye icon button
 2. Input type toggles between "password" and "text"
 3. Icon changes (Eye ↔ EyeOff)
 
 ### 8.4 Validate API Key
+
 1. User clicks "VALIDATE" button or presses Enter
 2. Button shows spinning `@` animation
 3. Form inputs become disabled
@@ -548,6 +557,7 @@ const response = await apiFetch("/api/api-keys", {
    - Re-enable form
 
 ### 8.5 Remove API Key
+
 1. User clicks "REMOVE API KEY" button
 2. Button shows loading state
 3. Request sent to `DELETE /api/api-keys`
@@ -561,6 +571,7 @@ const response = await apiFetch("/api/api-keys", {
    - Keep current state
 
 ### 8.6 Navigate Back
+
 1. User clicks SMELT logo or back arrow
 2. Navigate to main page (`/`)
 
@@ -568,33 +579,33 @@ const response = await apiFetch("/api/api-keys", {
 
 ### 9.1 Client-Side Validation
 
-| Condition | Component | Effect |
-|-----------|-----------|--------|
-| Empty input | ApiKeyInput, ValidateButton | Validate button disabled |
-| Invalid format (regex) | ApiKeyForm | Show format error before submission |
-| Validating in progress | ApiKeyForm | All inputs disabled, button shows spinner |
-| Removing in progress | RemoveKeyButton | Button disabled, shows loading |
+| Condition              | Component                   | Effect                                    |
+| ---------------------- | --------------------------- | ----------------------------------------- |
+| Empty input            | ApiKeyInput, ValidateButton | Validate button disabled                  |
+| Invalid format (regex) | ApiKeyForm                  | Show format error before submission       |
+| Validating in progress | ApiKeyForm                  | All inputs disabled, button shows spinner |
+| Removing in progress   | RemoveKeyButton             | Button disabled, shows loading            |
 
 ### 9.2 Server-Side Validation (displayed in UI)
 
-| Condition | API Error Code | UI Effect |
-|-----------|----------------|-----------|
-| Malformed key format | `invalid_key_format` | Coral ValidationStatus with message |
-| Key rejected by OpenRouter | `key_invalid` | Coral ValidationStatus with message |
-| Key has no quota | `key_quota_exhausted` | Coral ValidationStatus with message |
-| Validation network error | `validation_failed` | Coral ValidationStatus with retry message |
-| Not authenticated | `unauthorized` | Redirect to `/auth` |
+| Condition                  | API Error Code        | UI Effect                                 |
+| -------------------------- | --------------------- | ----------------------------------------- |
+| Malformed key format       | `invalid_key_format`  | Coral ValidationStatus with message       |
+| Key rejected by OpenRouter | `key_invalid`         | Coral ValidationStatus with message       |
+| Key has no quota           | `key_quota_exhausted` | Coral ValidationStatus with message       |
+| Validation network error   | `validation_failed`   | Coral ValidationStatus with retry message |
+| Not authenticated          | `unauthorized`        | Redirect to `/auth`                       |
 
 ### 9.3 State-Dependent UI
 
-| State | UI Elements Shown |
-|-------|-------------------|
-| Loading | Centered "LOADING..." text |
-| No key configured | Status badge "NO KEY", API key form |
-| Key valid | Status badge "VALID" (mint), Remove button, validated date |
-| Key invalid | Status badge "INVALID" (coral), API key form, Remove button |
-| Validating | Form disabled, spinning button |
-| Removing | Remove button disabled with loading |
+| State             | UI Elements Shown                                           |
+| ----------------- | ----------------------------------------------------------- |
+| Loading           | Centered "LOADING..." text                                  |
+| No key configured | Status badge "NO KEY", API key form                         |
+| Key valid         | Status badge "VALID" (mint), Remove button, validated date  |
+| Key invalid       | Status badge "INVALID" (coral), API key form, Remove button |
+| Validating        | Form disabled, spinning button                              |
+| Removing          | Remove button disabled with loading                         |
 
 ## 10. Error Handling
 
@@ -614,6 +625,7 @@ Display in ValidationStatus component with coral styling.
 ### 10.2 Authentication Errors
 
 On 401 response from any endpoint:
+
 ```typescript
 if (response.status === 401) {
   window.location.href = "/auth";
@@ -624,6 +636,7 @@ if (response.status === 401) {
 ### 10.3 API Errors
 
 Parse error response and display:
+
 ```typescript
 const data = await response.json();
 const error = data.error || {
@@ -642,16 +655,20 @@ setError(error);
 ## 11. Implementation Steps
 
 ### Step 1: Create Types File
+
 Create `src/components/settings/types.ts` with ViewModel types.
 
 ### Step 2: Create Custom Hook
+
 Create `src/components/hooks/useApiKeyManagement.ts` with:
+
 - State management for all API key operations
 - API calls using `apiFetch`
 - Error handling logic
 - Integration with auth store for usage refresh
 
 ### Step 3: Create UI Components
+
 Create components in `src/components/settings/`:
 
 1. `ApiKeyStatusBadge.tsx` - Status indicator
@@ -666,7 +683,9 @@ Create components in `src/components/settings/`:
 10. `index.ts` - Component exports
 
 ### Step 4: Create Astro Page
+
 Create `src/pages/settings.astro`:
+
 ```astro
 ---
 import Layout from "../layouts/Layout.astro";
@@ -680,11 +699,17 @@ export const prerender = false;
 ```
 
 ### Step 5: Add Spinning Animation
+
 Add CSS animation for the spinning `@` symbol in global.css or component:
+
 ```css
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .animate-spin {
   animation: spin 1s linear infinite;
@@ -727,6 +752,7 @@ Add CSS animation for the spinning `@` symbol in global.css or component:
    - [ ] Screen reader announces status changes
 
 ### Step 7: Integration Testing
+
 - Test with real OpenRouter API keys (valid and invalid)
 - Test key removal and re-addition
 - Verify credit display updates in header
@@ -738,16 +764,16 @@ This section details which components from [neobrutalism.dev](https://www.neobru
 
 ### 12.1 Required Components
 
-| Component | Purpose in Settings View | Already Installed? |
-|-----------|-------------------------|-------------------|
-| **Card** | Main container for API key section | Yes |
-| **Input** | API key text input field | Yes |
-| **Button** | Validate and Remove buttons | Yes |
-| **Badge** | Status indicator (NO KEY, VALID, INVALID) | **No - Install** |
-| **Label** | Form field labels | **No - Install** |
-| **Alert** | Validation feedback display | **No - Install** |
-| **Sonner** | Toast notifications for success/error | **No - Install** |
-| **Tooltip** | Help text for API key input | **No - Install** |
+| Component   | Purpose in Settings View                  | Already Installed? |
+| ----------- | ----------------------------------------- | ------------------ |
+| **Card**    | Main container for API key section        | Yes                |
+| **Input**   | API key text input field                  | Yes                |
+| **Button**  | Validate and Remove buttons               | Yes                |
+| **Badge**   | Status indicator (NO KEY, VALID, INVALID) | **No - Install**   |
+| **Label**   | Form field labels                         | **No - Install**   |
+| **Alert**   | Validation feedback display               | **No - Install**   |
+| **Sonner**  | Toast notifications for success/error     | **No - Install**   |
+| **Tooltip** | Help text for API key input               | **No - Install**   |
 
 ### 12.2 Installation Commands
 
@@ -771,6 +797,7 @@ pnpm dlx shadcn@latest add https://neobrutalism.dev/r/tooltip.json
 ```
 
 Or install all at once:
+
 ```bash
 pnpm dlx shadcn@latest add https://neobrutalism.dev/r/badge.json https://neobrutalism.dev/r/label.json https://neobrutalism.dev/r/alert.json https://neobrutalism.dev/r/sonner.json https://neobrutalism.dev/r/tooltip.json
 ```
@@ -782,26 +809,16 @@ pnpm dlx shadcn@latest add https://neobrutalism.dev/r/badge.json https://neobrut
 Use the Card component to wrap the entire API key management section:
 
 ```tsx
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ApiKeySection() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>API KEY</CardTitle>
-        <CardDescription>
-          ADD YOUR OPENROUTER API KEY FOR UNLIMITED PROCESSING
-        </CardDescription>
+        <CardDescription>ADD YOUR OPENROUTER API KEY FOR UNLIMITED PROCESSING</CardDescription>
       </CardHeader>
-      <CardContent>
-        {/* Form and status components */}
-      </CardContent>
+      <CardContent>{/* Form and status components */}</CardContent>
     </Card>
   );
 }
@@ -985,7 +1002,7 @@ Set up the Toaster provider and use toast for notifications:
 import { Toaster } from "@/components/ui/sonner";
 
 // In your layout/root component
-<Toaster />
+<Toaster />;
 ```
 
 **2. Use toast in the hook for success/error feedback:**
@@ -1045,12 +1062,7 @@ const removeKey = async () => {
 Use Tooltip to provide help information about the API key:
 
 ```tsx
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 
 <TooltipProvider>
@@ -1065,7 +1077,7 @@ import { HelpCircle } from "lucide-react";
       <p className="text-xs text-foreground/60">KEYS START WITH sk-or-v1-</p>
     </TooltipContent>
   </Tooltip>
-</TooltipProvider>
+</TooltipProvider>;
 ```
 
 ### 12.4 Complete ApiKeySection Example
@@ -1117,8 +1129,8 @@ export function ApiKeySection() {
                 keyStatus.status === "valid"
                   ? "bg-neo-mint text-foreground"
                   : keyStatus.status === "invalid"
-                  ? "bg-neo-coral text-background"
-                  : ""
+                    ? "bg-neo-coral text-background"
+                    : ""
               }
             >
               {keyStatus.status === "none" && <Key className="w-3 h-3 mr-1" />}
@@ -1128,9 +1140,7 @@ export function ApiKeySection() {
             </Badge>
           )}
         </div>
-        <CardDescription>
-          ADD YOUR OPENROUTER API KEY FOR UNLIMITED PROCESSING
-        </CardDescription>
+        <CardDescription>ADD YOUR OPENROUTER API KEY FOR UNLIMITED PROCESSING</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -1163,13 +1173,7 @@ export function ApiKeySection() {
                   disabled={isValidating}
                   className={error ? "border-neo-coral" : ""}
                 />
-                <Button
-                  type="button"
-                  variant="neutral"
-                  size="icon"
-                  onClick={toggleShowKey}
-                  disabled={isValidating}
-                >
+                <Button type="button" variant="neutral" size="icon" onClick={toggleShowKey} disabled={isValidating}>
                   {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
               </div>
@@ -1205,23 +1209,12 @@ export function ApiKeySection() {
               <AlertTitle>UNLIMITED ACCESS</AlertTitle>
               <AlertDescription>
                 YOUR API KEY IS ACTIVE. VALIDATED{" "}
-                {keyStatus.validated_at
-                  ? new Date(keyStatus.validated_at).toLocaleDateString()
-                  : "RECENTLY"}
+                {keyStatus.validated_at ? new Date(keyStatus.validated_at).toLocaleDateString() : "RECENTLY"}
               </AlertDescription>
             </Alert>
 
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={removeKey}
-              disabled={isRemoving}
-            >
-              {isRemoving ? (
-                <span className="animate-spin inline-block">@</span>
-              ) : (
-                <Trash2 className="w-4 h-4 mr-2" />
-              )}
+            <Button variant="destructive" className="w-full" onClick={removeKey} disabled={isRemoving}>
+              {isRemoving ? <span className="animate-spin inline-block">@</span> : <Trash2 className="w-4 h-4 mr-2" />}
               REMOVE API KEY
             </Button>
           </div>
@@ -1236,14 +1229,14 @@ export function ApiKeySection() {
 
 The neobrutalism components use these CSS variables from your `global.css`:
 
-| Variable | Usage |
-|----------|-------|
-| `--neo-mint` | Success states (valid key) |
-| `--neo-coral` | Error states, destructive actions |
-| `--border` | Thick 2px borders |
-| `--shadow` | Box shadows for depth |
-| `--background` | Card and input backgrounds |
-| `--foreground` | Text color |
+| Variable       | Usage                             |
+| -------------- | --------------------------------- |
+| `--neo-mint`   | Success states (valid key)        |
+| `--neo-coral`  | Error states, destructive actions |
+| `--border`     | Thick 2px borders                 |
+| `--shadow`     | Box shadows for depth             |
+| `--background` | Card and input backgrounds        |
+| `--foreground` | Text color                        |
 
 For custom styling overrides on neobrutalism components, use Tailwind classes:
 

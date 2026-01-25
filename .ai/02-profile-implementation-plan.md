@@ -4,9 +4,9 @@
 
 The User Profile endpoint retrieves the authenticated user's complete profile information, including credit balance, API key status, and account metadata.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/profile` | GET | Get current user's full profile |
+| Endpoint       | Method | Description                     |
+| -------------- | ------ | ------------------------------- |
+| `/api/profile` | GET    | Get current user's full profile |
 
 ---
 
@@ -77,6 +77,7 @@ export type UserProfileResponse = z.infer<typeof userProfileResponseSchema>;
 ### GET /api/profile
 
 **Success (200 OK)**:
+
 ```json
 {
   "user_id": "uuid",
@@ -172,12 +173,12 @@ interface ErrorResponse {
 
 ### Error Scenarios
 
-| Scenario | Status | Code | Message |
-|----------|--------|------|---------|
-| No Authorization header | 401 | `unauthorized` | LOGIN REQUIRED |
-| Invalid/expired token | 401 | `unauthorized` | LOGIN REQUIRED |
-| Profile not in database | 404 | `profile_not_found` | PROFILE NOT FOUND |
-| Database error | 500 | `internal_error` | SOMETHING WENT WRONG. TRY AGAIN |
+| Scenario                | Status | Code                | Message                         |
+| ----------------------- | ------ | ------------------- | ------------------------------- |
+| No Authorization header | 401    | `unauthorized`      | LOGIN REQUIRED                  |
+| Invalid/expired token   | 401    | `unauthorized`      | LOGIN REQUIRED                  |
+| Profile not in database | 404    | `profile_not_found` | PROFILE NOT FOUND               |
+| Database error          | 500    | `internal_error`    | SOMETHING WENT WRONG. TRY AGAIN |
 
 ---
 
@@ -330,7 +331,10 @@ export const prerender = false;
 export async function GET(context: APIContext) {
   try {
     // Verify authentication
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
       return new Response(
@@ -382,10 +386,11 @@ export interface AuthenticatedUser {
   email: string;
 }
 
-export async function requireAuth(
-  context: APIContext
-): Promise<AuthenticatedUser | Response> {
-  const { data: { user }, error } = await context.locals.supabase.auth.getUser();
+export async function requireAuth(context: APIContext): Promise<AuthenticatedUser | Response> {
+  const {
+    data: { user },
+    error,
+  } = await context.locals.supabase.auth.getUser();
 
   if (error || !user) {
     return new Response(
@@ -408,6 +413,7 @@ export function isAuthError(result: AuthenticatedUser | Response): result is Res
 ```
 
 **Usage in endpoint**:
+
 ```typescript
 import { requireAuth, isAuthError } from "@/lib/utils/auth-guard";
 

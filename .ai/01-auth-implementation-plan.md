@@ -4,12 +4,12 @@
 
 Authentication endpoints handle user registration, login, logout, and session management. These endpoints integrate with Supabase Auth for JWT-based authentication.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | Create new user account |
-| `/api/auth/login` | POST | Authenticate existing user |
-| `/api/auth/logout` | POST | Terminate user session |
-| `/api/auth/session` | GET | Get current session status |
+| Endpoint             | Method | Description                |
+| -------------------- | ------ | -------------------------- |
+| `/api/auth/register` | POST   | Create new user account    |
+| `/api/auth/login`    | POST   | Authenticate existing user |
+| `/api/auth/logout`   | POST   | Terminate user session     |
+| `/api/auth/session`  | GET    | Get current session status |
 
 ---
 
@@ -21,6 +21,7 @@ Authentication endpoints handle user registration, login, logout, and session ma
 - **URL Structure**: `/api/auth/register`
 - **Headers**: `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "email": "user@example.com",
@@ -34,6 +35,7 @@ Authentication endpoints handle user registration, login, logout, and session ma
 - **URL Structure**: `/api/auth/login`
 - **Headers**: `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "email": "user@example.com",
@@ -135,14 +137,8 @@ type SessionDTO = SessionAuthenticatedDTO | SessionAnonymousDTO;
 import { z } from "zod";
 
 export const authCredentialsSchema = z.object({
-  email: z
-    .string()
-    .min(1, "EMAIL REQUIRED")
-    .email("INVALID EMAIL FORMAT"),
-  password: z
-    .string()
-    .min(8, "PASSWORD TOO WEAK. MIN 8 CHARS")
-    .max(72, "PASSWORD TOO LONG. MAX 72 CHARS"),
+  email: z.string().min(1, "EMAIL REQUIRED").email("INVALID EMAIL FORMAT"),
+  password: z.string().min(8, "PASSWORD TOO WEAK. MIN 8 CHARS").max(72, "PASSWORD TOO LONG. MAX 72 CHARS"),
 });
 
 export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
@@ -155,6 +151,7 @@ export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
 ### POST /api/auth/register
 
 **Success (201 Created)**:
+
 ```json
 {
   "user": {
@@ -180,6 +177,7 @@ export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
 ### POST /api/auth/login
 
 **Success (200 OK)**:
+
 ```json
 {
   "user": {
@@ -204,6 +202,7 @@ export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
 ### POST /api/auth/logout
 
 **Success (200 OK)**:
+
 ```json
 {
   "message": "LOGGED OUT"
@@ -218,6 +217,7 @@ export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
 ### GET /api/auth/session
 
 **Success - Authenticated (200 OK)**:
+
 ```json
 {
   "authenticated": true,
@@ -236,6 +236,7 @@ export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
 ```
 
 **Success - Anonymous (200 OK)**:
+
 ```json
 {
   "authenticated": false,
@@ -391,14 +392,8 @@ function mapSupabaseAuthError(error: AuthError): { status: number; code: string;
 import { z } from "zod";
 
 export const authCredentialsSchema = z.object({
-  email: z
-    .string()
-    .min(1, "EMAIL REQUIRED")
-    .email("INVALID EMAIL FORMAT"),
-  password: z
-    .string()
-    .min(8, "PASSWORD TOO WEAK. MIN 8 CHARS")
-    .max(72, "PASSWORD TOO LONG. MAX 72 CHARS"),
+  email: z.string().min(1, "EMAIL REQUIRED").email("INVALID EMAIL FORMAT"),
+  password: z.string().min(8, "PASSWORD TOO WEAK. MIN 8 CHARS").max(72, "PASSWORD TOO LONG. MAX 72 CHARS"),
 });
 
 export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
@@ -410,12 +405,7 @@ export type AuthCredentialsInput = z.infer<typeof authCredentialsSchema>;
 
 ```typescript
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  AuthResponseDTO,
-  SessionAuthenticatedDTO,
-  SessionAnonymousDTO,
-  SessionDTO,
-} from "@/types";
+import type { AuthResponseDTO, SessionAuthenticatedDTO, SessionAnonymousDTO, SessionDTO } from "@/types";
 import { createHash } from "crypto";
 
 export class AuthService {
@@ -472,7 +462,9 @@ export class AuthService {
   }
 
   async getSession(clientIp: string): Promise<SessionDTO> {
-    const { data: { user } } = await this.supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
 
     if (user) {
       return this.getAuthenticatedSession(user.id, user.email!);
@@ -481,10 +473,7 @@ export class AuthService {
     return this.getAnonymousSession(clientIp);
   }
 
-  private async getAuthenticatedSession(
-    userId: string,
-    email: string
-  ): Promise<SessionAuthenticatedDTO> {
+  private async getAuthenticatedSession(userId: string, email: string): Promise<SessionAuthenticatedDTO> {
     const { data: profile, error } = await this.supabase
       .from("user_profiles")
       .select("credits_remaining, weekly_credits_max, credits_reset_at, api_key_status, api_key_validated_at")
@@ -576,10 +565,10 @@ export async function POST(context: APIContext) {
   } catch (error) {
     // Map Supabase auth errors to API responses
     const mapped = mapAuthError(error);
-    return new Response(
-      JSON.stringify({ error: { code: mapped.code, message: mapped.message } }),
-      { status: mapped.status, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: { code: mapped.code, message: mapped.message } }), {
+      status: mapped.status,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
@@ -655,22 +644,24 @@ export const prerender = false;
 
 export async function POST(context: APIContext) {
   try {
-    const { data: { user } } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await context.locals.supabase.auth.getUser();
 
     if (!user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "NOT LOGGED IN" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "NOT LOGGED IN" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const authService = new AuthService(context.locals.supabase);
     await authService.logout();
 
-    return new Response(
-      JSON.stringify({ message: "LOGGED OUT" }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ message: "LOGGED OUT" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch {
     return new Response(
       JSON.stringify({ error: { code: "internal_error", message: "SOMETHING WENT WRONG. TRY AGAIN" } }),
@@ -690,9 +681,10 @@ export const prerender = false;
 
 export async function GET(context: APIContext) {
   try {
-    const clientIp = context.request.headers.get("x-forwarded-for")?.split(",")[0]
-      ?? context.request.headers.get("x-real-ip")
-      ?? "unknown";
+    const clientIp =
+      context.request.headers.get("x-forwarded-for")?.split(",")[0] ??
+      context.request.headers.get("x-real-ip") ??
+      "unknown";
 
     const authService = new AuthService(context.locals.supabase);
     const session = await authService.getSession(clientIp);
@@ -720,16 +712,12 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/db/database.types";
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const supabase = createClient<Database>(
-    import.meta.env.SUPABASE_URL,
-    import.meta.env.SUPABASE_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
+  const supabase = createClient<Database>(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 
   // Extract token from Authorization header
   const authHeader = context.request.headers.get("Authorization");

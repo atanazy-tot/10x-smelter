@@ -97,6 +97,7 @@
 The application follows a **single-page application pattern** built with **Astro 5** for static shell and **React 19 islands** for interactive components. The visual design extends the existing **chaos-smelter neobrutalist aesthetic** using **Tailwind CSS 4**, **shadcn/ui**, and **neobrutalism.dev** components as the foundation.
 
 **Core Design System:**
+
 - **Color Palette**: cream (#FFFEF0), lime (#E8FF8D), lavender (#C8B6FF), coral (#FF6B6B), cyan (#A8E6FF), mint (#7BF1A8), yellow (#FFDE59), black (#000000)
 - **Typography**: Space Mono (monospace), uppercase headers, wide letter-spacing
 - **Styling**: Hard shadows (8px offset, no blur), thick borders (4px solid black), zero border-radius
@@ -105,6 +106,7 @@ The application follows a **single-page application pattern** built with **Astro
 ### Key Views, Screens, and User Flows
 
 **1. Main Processing Page (/)** — React Islands
+
 - Header with logo, credit display, LOGIN/user email, SETTINGS link (logged-in only), PROMPTS toggle (logged-in only)
 - DropZone for audio file upload (MP3, WAV, M4A)
 - OR/AND divider (dynamic based on input state)
@@ -117,6 +119,7 @@ The application follows a **single-page application pattern** built with **Astro
 - Error display (coral background with CTAs)
 
 **2. Authentication Page (/auth)** — Astro Page with React Island
+
 - Toggle between LOGIN and REGISTER modes
 - Email and password inputs (neobrutalist styling)
 - Submit button
@@ -124,6 +127,7 @@ The application follows a **single-page application pattern** built with **Astro
 - Error messages inline
 
 **3. Settings Page (/settings)** — Astro Page with React Island
+
 - API Key section:
   - Masked input field with SHOW toggle
   - VALIDATE button (shows "TESTING..." → "KEY VALID ✓" or "KEY INVALID ✗")
@@ -131,6 +135,7 @@ The application follows a **single-page application pattern** built with **Astro
 - Back to main link
 
 **4. Prompt Sidebar (logged-in only)** — React Island
+
 - Triggered by PROMPTS button in header
 - Slides in from left on desktop, full-screen overlay on mobile
 - Search/filter input at top
@@ -140,6 +145,7 @@ The application follows a **single-page application pattern** built with **Astro
 - Inline rename, delete icons
 
 **5. Prompt Editor Popup** — React Component
+
 - Overlay with semi-transparent cream backdrop
 - Black background, lime text (matching ResultsView)
 - Header: "NEW PROMPT" or editable existing title
@@ -151,6 +157,7 @@ The application follows a **single-page application pattern** built with **Astro
 ### User Flows
 
 **Anonymous User Flow:**
+
 1. Land on main page → see "1/1 DAILY SMELT AVAILABLE"
 2. Upload audio file(s) OR paste text
 3. Select predefined prompt (5 options)
@@ -160,6 +167,7 @@ The application follows a **single-page application pattern** built with **Astro
 7. Daily limit reached → see error with "SIGN UP" CTA
 
 **Logged-in User Flow:**
+
 1. Land on main page → see "5/5 LEFT THIS WEEK"
 2. Open sidebar → manage custom prompts
 3. Upload files AND/OR paste text (mixed input supported)
@@ -170,6 +178,7 @@ The application follows a **single-page application pattern** built with **Astro
 8. Weekly limit reached → see error with "ADD API KEY" CTA
 
 **Power User Flow (API Key):**
+
 1. Go to /settings → add API key
 2. See "TESTING..." → "KEY VALID ✓"
 3. Header updates to "UNLIMITED"
@@ -178,17 +187,20 @@ The application follows a **single-page application pattern** built with **Astro
 ### API Integration and State Management Strategy
 
 **State Management:**
+
 - **Zustand** for React state across islands
 - **No persistence** for prompt selection (design for quick re-selection)
 - LocalStorage only for auth tokens (via Supabase client)
 
 **API Integration:**
+
 - **Supabase Auth** for registration, login, logout, session management
 - **Supabase Database** for user profiles, prompts, sections, API keys
 - **Supabase Realtime** for processing progress (subscribe to `smelt:{id}` channel)
 - **REST API** endpoints per api-plan.md for CRUD operations
 
 **Key API Flows:**
+
 - `POST /api/smelts` — multipart form with files/text, mode, prompt selection
 - Subscribe to Realtime channel for progress events
 - `GET /api/smelts/:id` — fetch results on completion
@@ -196,6 +208,7 @@ The application follows a **single-page application pattern** built with **Astro
 - `POST /api/api-keys` — validate and store API key
 
 **Credit System:**
+
 - Pre-flight check before processing (client-side timestamp check + server validation)
 - Credits consumed only on successful completion
 - Page refresh required to see reset credits
@@ -203,6 +216,7 @@ The application follows a **single-page application pattern** built with **Astro
 ### Responsiveness, Accessibility, and Security Considerations
 
 **Responsiveness:**
+
 - Mobile-first with md breakpoint (768px)
 - Horizontal layout on wide screens (DropZone | OR | TextZone side-by-side)
 - Vertical stacking on narrow screens (DropZone above TextZone)
@@ -211,6 +225,7 @@ The application follows a **single-page application pattern** built with **Astro
 - Same responsive pattern as existing chaos-smelter
 
 **Accessibility:**
+
 - Semantic HTML elements
 - ARIA labels on custom components
 - Keyboard navigation (tab order, focus indicators)
@@ -219,6 +234,7 @@ The application follows a **single-page application pattern** built with **Astro
 - Neobrutalism.dev components provide accessible foundations
 
 **Security:**
+
 - API keys encrypted at rest (server-side)
 - API keys never returned to client after storage
 - IP-based rate limiting for anonymous users
@@ -229,17 +245,17 @@ The application follows a **single-page application pattern** built with **Astro
 
 ### Component Mapping to Neobrutalism.dev
 
-| chaos-smelter Component | Neobrutalism.dev Base | Customization |
-|------------------------|----------------------|---------------|
-| DropZone | Card + custom drag handling | shadow-brutal, border-brutal, lime/yellow states |
-| TextZone | Textarea | shadow-brutal-sm, monospace font |
-| ProcessButton | Button | Large size, shadow-brutal-lg, btn-press animation |
-| ProgressBar | Custom (keep existing) | 10-block grid, stage colors |
-| ResultsView | Card + Tabs | Black bg, lime text, code styling |
-| Prompt buttons | Button (variant) | Pill-style, thick border |
-| Sidebar | Sheet | Custom slide-in, cream bg |
-| Prompt Editor | Dialog/Card | Black bg overlay, lime text |
-| Form inputs | Input | No border-radius, thick borders |
+| chaos-smelter Component | Neobrutalism.dev Base       | Customization                                     |
+| ----------------------- | --------------------------- | ------------------------------------------------- |
+| DropZone                | Card + custom drag handling | shadow-brutal, border-brutal, lime/yellow states  |
+| TextZone                | Textarea                    | shadow-brutal-sm, monospace font                  |
+| ProcessButton           | Button                      | Large size, shadow-brutal-lg, btn-press animation |
+| ProgressBar             | Custom (keep existing)      | 10-block grid, stage colors                       |
+| ResultsView             | Card + Tabs                 | Black bg, lime text, code styling                 |
+| Prompt buttons          | Button (variant)            | Pill-style, thick border                          |
+| Sidebar                 | Sheet                       | Custom slide-in, cream bg                         |
+| Prompt Editor           | Dialog/Card                 | Black bg overlay, lime text                       |
+| Form inputs             | Input                       | No border-radius, thick borders                   |
 
 ---
 
@@ -266,18 +282,16 @@ The application follows a **single-page application pattern** built with **Astro
 ## Reference: Existing chaos-smelter Design System
 
 ### Color Palette (from index.css)
+
 ```css
---color-cream:     #FFFEF0   /* Primary background */
---color-lime:      #E8FF8D   /* Active/highlight (files) */
---color-lavender:  #C8B6FF   /* Active/highlight (text) */
---color-coral:     #FF6B6B   /* Error/destructive */
---color-cyan:      #A8E6FF   /* Secondary action */
---color-mint:      #7BF1A8   /* Success/complete */
---color-yellow:    #FFDE59   /* Drag state */
---color-black:     #000000   /* Border, text, shadows */
+--color-cream: #fffef0 /* Primary background */ --color-lime: #e8ff8d /* Active/highlight (files) */
+  --color-lavender: #c8b6ff /* Active/highlight (text) */ --color-coral: #ff6b6b /* Error/destructive */
+  --color-cyan: #a8e6ff /* Secondary action */ --color-mint: #7bf1a8 /* Success/complete */ --color-yellow: #ffde59
+  /* Drag state */ --color-black: #000000 /* Border, text, shadows */;
 ```
 
 ### Custom Utilities
+
 ```css
 /* Shadows (Neobrutalist) */
 .shadow-brutal:    8px 8px 0 #000
@@ -293,12 +307,14 @@ The application follows a **single-page application pattern** built with **Astro
 ```
 
 ### Typography
+
 - **Font Family**: Space Mono (Google Fonts)
 - **Headers**: font-bold uppercase tracking-tighter
 - **Status text**: text-xs uppercase tracking-widest opacity-70
 - **Body**: text-sm monospace tracking-wide
 
 ### Existing Components (chaos-smelter)
+
 - **App.tsx**: Root component with state management
 - **DropZone.tsx**: File upload with drag-and-drop
 - **TextZone.tsx**: Text input area

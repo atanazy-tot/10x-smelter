@@ -4,11 +4,11 @@
 
 API Key Management endpoints allow authenticated users to store, validate, check status, and remove their OpenAI API keys. Users with valid API keys get unlimited smelt processing.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/api-keys` | POST | Validate and store a new API key |
-| `/api/api-keys/status` | GET | Check current API key status |
-| `/api/api-keys` | DELETE | Remove stored API key |
+| Endpoint               | Method | Description                      |
+| ---------------------- | ------ | -------------------------------- |
+| `/api/api-keys`        | POST   | Validate and store a new API key |
+| `/api/api-keys/status` | GET    | Check current API key status     |
+| `/api/api-keys`        | DELETE | Remove stored API key            |
 
 ---
 
@@ -22,6 +22,7 @@ API Key Management endpoints allow authenticated users to store, validate, check
   - `Authorization: Bearer <access_token>` (required)
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "api_key": "sk-..."
@@ -94,10 +95,7 @@ import { z } from "zod";
 const OPENAI_KEY_REGEX = /^sk-(?:proj-)?[a-zA-Z0-9]{32,}$/;
 
 export const apiKeyCreateSchema = z.object({
-  api_key: z
-    .string()
-    .min(1, "API KEY REQUIRED")
-    .regex(OPENAI_KEY_REGEX, "INVALID API KEY FORMAT"),
+  api_key: z.string().min(1, "API KEY REQUIRED").regex(OPENAI_KEY_REGEX, "INVALID API KEY FORMAT"),
 });
 
 export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
@@ -110,6 +108,7 @@ export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
 ### POST /api/api-keys
 
 **Success (200 OK)**:
+
 ```json
 {
   "status": "valid",
@@ -130,6 +129,7 @@ export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
 ### GET /api/api-keys/status
 
 **Success - Has Key (200 OK)**:
+
 ```json
 {
   "has_key": true,
@@ -139,6 +139,7 @@ export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
 ```
 
 **Success - No Key (200 OK)**:
+
 ```json
 {
   "has_key": false,
@@ -155,6 +156,7 @@ export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
 ### DELETE /api/api-keys
 
 **Success (200 OK)**:
+
 ```json
 {
   "message": "API KEY REMOVED",
@@ -280,7 +282,7 @@ interface OpenRouterError {
 function mapOpenRouterError(response: OpenRouterError): {
   status: number;
   code: string;
-  message: string
+  message: string;
 } {
   const errorCode = response.error?.code;
   const errorMessage = response.error?.message?.toLowerCase() ?? "";
@@ -386,10 +388,7 @@ import { z } from "zod";
 const OPENAI_KEY_REGEX = /^sk-(?:proj-)?[a-zA-Z0-9]{20,}$/;
 
 export const apiKeyCreateSchema = z.object({
-  api_key: z
-    .string()
-    .min(1, "API KEY REQUIRED")
-    .regex(OPENAI_KEY_REGEX, "INVALID API KEY FORMAT"),
+  api_key: z.string().min(1, "API KEY REQUIRED").regex(OPENAI_KEY_REGEX, "INVALID API KEY FORMAT"),
 });
 
 export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
@@ -420,13 +419,11 @@ export class ApiKeysService {
     const validatedAt = new Date().toISOString();
 
     // Upsert encrypted key
-    const { error: keyError } = await this.supabase
-      .from("user_api_keys")
-      .upsert({
-        user_id: userId,
-        encrypted_key: encryptedKey,
-        updated_at: validatedAt,
-      });
+    const { error: keyError } = await this.supabase.from("user_api_keys").upsert({
+      user_id: userId,
+      encrypted_key: encryptedKey,
+      updated_at: validatedAt,
+    });
 
     if (keyError) throw keyError;
 
@@ -485,10 +482,7 @@ export class ApiKeysService {
     }
 
     // Delete the key
-    const { error: deleteError } = await this.supabase
-      .from("user_api_keys")
-      .delete()
-      .eq("user_id", userId);
+    const { error: deleteError } = await this.supabase.from("user_api_keys").delete().eq("user_id", userId);
 
     if (deleteError) throw deleteError;
 
@@ -601,13 +595,16 @@ export const prerender = false;
 export async function POST(context: APIContext) {
   try {
     // Verify authentication
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Validate request body
@@ -633,10 +630,10 @@ export async function POST(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof ApiKeyValidationError) {
-      return new Response(
-        JSON.stringify({ error: { code: error.code, message: error.message } }),
-        { status: 422, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: error.code, message: error.message } }), {
+        status: 422,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("API key storage error:", error);
@@ -652,13 +649,16 @@ export async function POST(context: APIContext) {
 export async function DELETE(context: APIContext) {
   try {
     // Verify authentication
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Delete key
@@ -671,10 +671,10 @@ export async function DELETE(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof NoApiKeyError) {
-      return new Response(
-        JSON.stringify({ error: { code: "no_key", message: "NO API KEY CONFIGURED" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "no_key", message: "NO API KEY CONFIGURED" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("API key deletion error:", error);
@@ -699,13 +699,16 @@ export const prerender = false;
 export async function GET(context: APIContext) {
   try {
     // Verify authentication
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Get status

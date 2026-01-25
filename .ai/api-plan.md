@@ -2,14 +2,14 @@
 
 ## 1. Resources
 
-| Resource | Database Table | Description |
-|----------|---------------|-------------|
-| User Profile | `user_profiles` | User account data including credits and settings |
-| API Keys | `user_api_keys` | Encrypted OpenAI API key storage |
-| Prompt Sections | `prompt_sections` | Organizational folders for custom prompts |
-| Prompts | `prompts` | User-created custom prompts |
-| Smelts | `smelts` | Main processing operations |
-| Smelt Files | `smelt_files` | Individual input files for processing |
+| Resource        | Database Table    | Description                                         |
+| --------------- | ----------------- | --------------------------------------------------- |
+| User Profile    | `user_profiles`   | User account data including credits and settings    |
+| API Keys        | `user_api_keys`   | Encrypted OpenAI API key storage                    |
+| Prompt Sections | `prompt_sections` | Organizational folders for custom prompts           |
+| Prompts         | `prompts`         | User-created custom prompts                         |
+| Smelts          | `smelts`          | Main processing operations                          |
+| Smelt Files     | `smelt_files`     | Individual input files for processing               |
 | Anonymous Usage | `anonymous_usage` | Daily usage tracking for anonymous users (internal) |
 
 ---
@@ -25,6 +25,7 @@ Authentication is handled primarily through Supabase Auth. The following endpoin
 Creates a new user account and initializes the user profile.
 
 **Request Payload:**
+
 ```json
 {
   "email": "user@example.com",
@@ -33,6 +34,7 @@ Creates a new user account and initializes the user profile.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "user": {
@@ -62,6 +64,7 @@ Creates a new user account and initializes the user profile.
 Authenticates an existing user.
 
 **Request Payload:**
+
 ```json
 {
   "email": "user@example.com",
@@ -70,6 +73,7 @@ Authenticates an existing user.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "user": {
@@ -98,9 +102,11 @@ Authenticates an existing user.
 Terminates the current user session.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "LOGGED OUT"
@@ -119,9 +125,11 @@ Terminates the current user session.
 Retrieves the current session and user information.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>` (optional for anonymous check)
 
 **Response (200 OK) - Authenticated:**
+
 ```json
 {
   "authenticated": true,
@@ -140,6 +148,7 @@ Retrieves the current session and user information.
 ```
 
 **Response (200 OK) - Anonymous:**
+
 ```json
 {
   "authenticated": false,
@@ -160,9 +169,11 @@ Retrieves the current session and user information.
 Retrieves the current authenticated user's profile.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Response (200 OK):**
+
 ```json
 {
   "user_id": "uuid",
@@ -190,9 +201,11 @@ Retrieves the current authenticated user's profile.
 Validates and stores an OpenAI API key for unlimited processing.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request Payload:**
+
 ```json
 {
   "api_key": "sk-..."
@@ -200,6 +213,7 @@ Validates and stores an OpenAI API key for unlimited processing.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "status": "valid",
@@ -224,9 +238,11 @@ Validates and stores an OpenAI API key for unlimited processing.
 Returns the current API key status (never returns the actual key).
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Response (200 OK):**
+
 ```json
 {
   "has_key": true,
@@ -236,6 +252,7 @@ Returns the current API key status (never returns the actual key).
 ```
 
 **Response (200 OK) - No key configured:**
+
 ```json
 {
   "has_key": false,
@@ -256,9 +273,11 @@ Returns the current API key status (never returns the actual key).
 Removes the stored API key and reverts user to free tier.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "API KEY REMOVED",
@@ -282,6 +301,7 @@ Removes the stored API key and reverts user to free tier.
 Lists all prompt sections for the authenticated user.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Query Parameters:**
@@ -291,6 +311,7 @@ Lists all prompt sections for the authenticated user.
 | `order` | string | `asc` | Sort order: `asc`, `desc` |
 
 **Response (200 OK):**
+
 ```json
 {
   "sections": [
@@ -326,9 +347,11 @@ Lists all prompt sections for the authenticated user.
 Creates a new prompt section.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request Payload:**
+
 ```json
 {
   "title": "Meetings",
@@ -337,6 +360,7 @@ Creates a new prompt section.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -360,12 +384,15 @@ Creates a new prompt section.
 Updates an existing prompt section.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Path Parameters:**
+
 - `id` - Section UUID
 
 **Request Payload:**
+
 ```json
 {
   "title": "Work Meetings",
@@ -374,6 +401,7 @@ Updates an existing prompt section.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -398,12 +426,15 @@ Updates an existing prompt section.
 Deletes a prompt section. Prompts in the section are moved to unsectioned.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Path Parameters:**
+
 - `id` - Section UUID
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "SECTION DELETED",
@@ -424,9 +455,11 @@ Deletes a prompt section. Prompts in the section are moved to unsectioned.
 Reorders multiple sections at once.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request Payload:**
+
 ```json
 {
   "order": [
@@ -438,6 +471,7 @@ Reorders multiple sections at once.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "SECTIONS REORDERED",
@@ -461,6 +495,7 @@ Reorders multiple sections at once.
 Lists all custom prompts for the authenticated user.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Query Parameters:**
@@ -473,6 +508,7 @@ Lists all custom prompts for the authenticated user.
 | `limit` | integer | 50 | Items per page (max 100) |
 
 **Response (200 OK):**
+
 ```json
 {
   "prompts": [
@@ -507,9 +543,11 @@ Lists all custom prompts for the authenticated user.
 Creates a new custom prompt. Prompts can optionally belong to a section (similar to tab groups in MS Edge). If no section is given, the prompt is "unsectioned" and displayed freely.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request Payload:**
+
 ```json
 {
   "title": "Interview Notes",
@@ -518,9 +556,11 @@ Creates a new custom prompt. Prompts can optionally belong to a section (similar
   "position": 0
 }
 ```
+
 - `section_id` (optional): Set to a section UUID to assign this prompt to a section, or omit/null to leave it ungrouped.
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -549,12 +589,15 @@ Creates a new custom prompt. Prompts can optionally belong to a section (similar
 Retrieves a single prompt by ID.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Path Parameters:**
+
 - `id` - Prompt UUID
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -580,12 +623,15 @@ Retrieves a single prompt by ID.
 Updates an existing prompt.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Path Parameters:**
+
 - `id` - Prompt UUID
 
 **Request Payload:**
+
 ```json
 {
   "title": "Updated Interview Notes",
@@ -596,6 +642,7 @@ Updates an existing prompt.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -622,12 +669,15 @@ Updates an existing prompt.
 Deletes a custom prompt.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Path Parameters:**
+
 - `id` - Prompt UUID
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "PROMPT DELETED"
@@ -647,15 +697,18 @@ Deletes a custom prompt.
 Creates a prompt from an uploaded .MD file.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 - `Content-Type: multipart/form-data`
 
 **Request Payload (multipart/form-data):**
+
 - `file` - The .MD file (max 10KB)
 - `title` - Optional title (defaults to filename)
 - `section_id` - Optional section UUID
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -683,9 +736,11 @@ Creates a prompt from an uploaded .MD file.
 Reorders prompts within a section.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request Payload:**
+
 ```json
 {
   "section_id": "uuid",
@@ -697,6 +752,7 @@ Reorders prompts within a section.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "PROMPTS REORDERED",
@@ -720,10 +776,12 @@ Reorders prompts within a section.
 Creates a new smelt operation and initiates processing.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>` (optional for anonymous)
 - `Content-Type: multipart/form-data`
 
 **Request Payload (multipart/form-data):**
+
 - `files[]` - Audio files (MP3, WAV, M4A) - max 5 files, 25MB each
 - `text` - Text input (alternative to files)
 - `mode` - Processing mode: `separate` or `combine` (default: `separate`)
@@ -733,6 +791,7 @@ Creates a new smelt operation and initiates processing.
 If no prompt is specified (`default_prompt_names` is empty and `user_prompt_id` is null), the system applies a basic "clean & transcribe" operation that returns a cleaned-up transcript without additional formatting or synthesis.
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -779,12 +838,15 @@ If no prompt is specified (`default_prompt_names` is empty and `user_prompt_id` 
 Retrieves the current status of a smelt operation.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>` (required for authenticated smelts)
 
 **Path Parameters:**
+
 - `id` - Smelt UUID
 
 **Response (200 OK) - Processing:**
+
 ```json
 {
   "id": "uuid",
@@ -812,6 +874,7 @@ Retrieves the current status of a smelt operation.
 ```
 
 **Response (200 OK) - Completed:**
+
 ```json
 {
   "id": "uuid",
@@ -841,6 +904,7 @@ Retrieves the current status of a smelt operation.
 ```
 
 **Response (200 OK) - Failed:**
+
 ```json
 {
   "id": "uuid",
@@ -876,6 +940,7 @@ Retrieves the current status of a smelt operation.
 Lists the authenticated user's smelt history.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>`
 
 **Query Parameters:**
@@ -888,6 +953,7 @@ Lists the authenticated user's smelt history.
 | `limit` | integer | 20 | Items per page (max 50) |
 
 **Response (200 OK):**
+
 ```json
 {
   "smelts": [
@@ -924,9 +990,11 @@ Lists the authenticated user's smelt history.
 Returns current usage status for both anonymous and authenticated users.
 
 **Headers:**
+
 - `Authorization: Bearer <access_token>` (optional)
 
 **Response (200 OK) - Anonymous:**
+
 ```json
 {
   "type": "anonymous",
@@ -938,6 +1006,7 @@ Returns current usage status for both anonymous and authenticated users.
 ```
 
 **Response (200 OK) - Authenticated (Free Tier):**
+
 ```json
 {
   "type": "authenticated",
@@ -950,6 +1019,7 @@ Returns current usage status for both anonymous and authenticated users.
 ```
 
 **Response (200 OK) - Authenticated (With API Key):**
+
 ```json
 {
   "type": "unlimited",
@@ -959,6 +1029,7 @@ Returns current usage status for both anonymous and authenticated users.
 ```
 
 **Response (200 OK) - Limit Reached:**
+
 ```json
 {
   "type": "authenticated",
@@ -980,6 +1051,7 @@ Progress updates are delivered via Supabase Realtime subscriptions, not REST end
 **Subscription Channel:** `smelt:{smelt_id}`
 
 **Progress Event Payload:**
+
 ```json
 {
   "event": "progress",
@@ -1003,6 +1075,7 @@ Progress updates are delivered via Supabase Realtime subscriptions, not REST end
 ```
 
 **Completion Event Payload:**
+
 ```json
 {
   "event": "completed",
@@ -1021,6 +1094,7 @@ Progress updates are delivered via Supabase Realtime subscriptions, not REST end
 ```
 
 **Error Event Payload:**
+
 ```json
 {
   "event": "failed",
@@ -1051,10 +1125,12 @@ Progress updates are delivered via Supabase Realtime subscriptions, not REST end
 The API uses Supabase Auth for authentication with JWT tokens.
 
 **Token Types:**
+
 - **Access Token**: Short-lived JWT for API requests (expires in 1 hour)
 - **Refresh Token**: Long-lived token for obtaining new access tokens
 
 **Authentication Flow:**
+
 1. User authenticates via `/api/auth/login` or `/api/auth/register`
 2. Server returns access token and refresh token
 3. Client includes access token in `Authorization: Bearer <token>` header
@@ -1062,12 +1138,12 @@ The API uses Supabase Auth for authentication with JWT tokens.
 
 ### 3.2 Authorization Levels
 
-| Level | Description | Capabilities |
-|-------|-------------|--------------|
-| Anonymous | No authentication | 1 smelt/day, predefined prompts only, separate mode only |
-| Authenticated | Logged-in user | 5 smelts/week, custom prompts, combine mode |
-| Unlimited | Authenticated + API key | Unlimited smelts, all features |
-| Service Role | Internal server operations | Full database access, processing updates |
+| Level         | Description                | Capabilities                                             |
+| ------------- | -------------------------- | -------------------------------------------------------- |
+| Anonymous     | No authentication          | 1 smelt/day, predefined prompts only, separate mode only |
+| Authenticated | Logged-in user             | 5 smelts/week, custom prompts, combine mode              |
+| Unlimited     | Authenticated + API key    | Unlimited smelts, all features                           |
+| Service Role  | Internal server operations | Full database access, processing updates                 |
 
 ### 3.3 Row-Level Security
 
@@ -1080,12 +1156,12 @@ All database access is protected by Supabase RLS policies:
 
 ### 3.4 Rate Limiting
 
-| User Type | Limit | Reset |
-|-----------|-------|-------|
-| Anonymous | 1 smelt/day | Midnight UTC |
+| User Type     | Limit         | Reset               |
+| ------------- | ------------- | ------------------- |
+| Anonymous     | 1 smelt/day   | Midnight UTC        |
 | Authenticated | 5 smelts/week | Monday midnight UTC |
-| With API Key | Unlimited | N/A |
-| API Requests | 100/minute | Rolling window |
+| With API Key  | Unlimited     | N/A                 |
+| API Requests  | 100/minute    | Rolling window      |
 
 ---
 
@@ -1094,32 +1170,36 @@ All database access is protected by Supabase RLS policies:
 ### 4.1 Input Validation
 
 #### File Validation
-| Constraint | Rule | Error Code | Error Message |
-|------------|------|------------|---------------|
-| Format | MP3, WAV, M4A only | `invalid_format` | CAN'T READ THAT. TRY .MP3 .WAV .M4A |
-| Size | Max 25MB per file | `file_too_large` | FILE TOO CHUNKY. MAX 25MB. YOUR FILE: {size}MB |
-| Duration | Max 30 minutes | `duration_exceeded` | AUDIO TOO LONG. MAX 30 MINUTES |
-| Count | Max 5 files | `too_many_files` | MAX 5 FILES ALLOWED |
-| Integrity | Not corrupted | `corrupted_file` | CORRUPTED FILE. TRY A DIFFERENT ONE |
+
+| Constraint | Rule               | Error Code          | Error Message                                  |
+| ---------- | ------------------ | ------------------- | ---------------------------------------------- |
+| Format     | MP3, WAV, M4A only | `invalid_format`    | CAN'T READ THAT. TRY .MP3 .WAV .M4A            |
+| Size       | Max 25MB per file  | `file_too_large`    | FILE TOO CHUNKY. MAX 25MB. YOUR FILE: {size}MB |
+| Duration   | Max 30 minutes     | `duration_exceeded` | AUDIO TOO LONG. MAX 30 MINUTES                 |
+| Count      | Max 5 files        | `too_many_files`    | MAX 5 FILES ALLOWED                            |
+| Integrity  | Not corrupted      | `corrupted_file`    | CORRUPTED FILE. TRY A DIFFERENT ONE            |
 
 #### Prompt Validation
-| Constraint | Rule | Error Code | Error Message |
-|------------|------|------------|---------------|
-| Title | Required, non-empty | `missing_title` | PROMPT TITLE REQUIRED |
-| Body | Required, non-empty | `missing_body` | PROMPT CONTENT REQUIRED |
-| Body Length | Max 4,000 characters | `body_too_long` | PROMPT TOO LONG. KEEP IT UNDER 4,000 CHARS |
-| Upload Size | Max 10KB for .MD files | `file_too_large` | FILE TOO BIG. MAX 10KB |
+
+| Constraint  | Rule                   | Error Code       | Error Message                              |
+| ----------- | ---------------------- | ---------------- | ------------------------------------------ |
+| Title       | Required, non-empty    | `missing_title`  | PROMPT TITLE REQUIRED                      |
+| Body        | Required, non-empty    | `missing_body`   | PROMPT CONTENT REQUIRED                    |
+| Body Length | Max 4,000 characters   | `body_too_long`  | PROMPT TOO LONG. KEEP IT UNDER 4,000 CHARS |
+| Upload Size | Max 10KB for .MD files | `file_too_large` | FILE TOO BIG. MAX 10KB                     |
 
 #### API Key Validation
-| Constraint | Rule | Error Code | Error Message |
-|------------|------|------------|---------------|
-| Format | Valid OpenAI key format | `invalid_key_format` | INVALID API KEY FORMAT |
-| Validity | Key works with OpenAI | `key_invalid` | KEY INVALID ✗ - CHECK YOUR KEY |
-| Quota | Key has available quota | `key_quota_exhausted` | KEY QUOTA EXHAUSTED |
+
+| Constraint | Rule                    | Error Code            | Error Message                  |
+| ---------- | ----------------------- | --------------------- | ------------------------------ |
+| Format     | Valid OpenAI key format | `invalid_key_format`  | INVALID API KEY FORMAT         |
+| Validity   | Key works with OpenAI   | `key_invalid`         | KEY INVALID ✗ - CHECK YOUR KEY |
+| Quota      | Key has available quota | `key_quota_exhausted` | KEY QUOTA EXHAUSTED            |
 
 ### 4.2 Business Logic Implementation
 
 #### Credit System
+
 ```
 On smelt creation:
 1. Check user authentication status
@@ -1138,6 +1218,7 @@ On smelt creation:
 ```
 
 #### Credit Reset Logic
+
 ```
 Weekly reset (cron job every Monday 00:00 UTC):
 1. Query user_profiles where credits_reset_at <= now()
@@ -1146,6 +1227,7 @@ Weekly reset (cron job every Monday 00:00 UTC):
 ```
 
 #### Combine Mode Logic
+
 ```
 On combine mode processing:
 1. Validate user is authenticated
@@ -1162,38 +1244,41 @@ On combine mode processing:
 ```
 
 #### Processing Mode Availability
-| Mode | Anonymous | Authenticated | With API Key |
-|------|-----------|---------------|--------------|
-| Separate (single file) | ✓ | ✓ | ✓ |
-| Separate (multiple files) | ✗ | ✓ | ✓ |
-| Combine | ✗ | ✓ | ✓ |
+
+| Mode                      | Anonymous | Authenticated | With API Key |
+| ------------------------- | --------- | ------------- | ------------ |
+| Separate (single file)    | ✓         | ✓             | ✓            |
+| Separate (multiple files) | ✗         | ✓             | ✓            |
+| Combine                   | ✗         | ✓             | ✓            |
 
 ### 4.3 Error Code Reference
 
 #### Smelt Error Codes (smelt_error_code enum)
-| Code | HTTP Status | User Message |
-|------|-------------|--------------|
-| `file_too_large` | 400 | FILE TOO CHUNKY. MAX 25MB |
-| `invalid_format` | 400 | CAN'T READ THAT. TRY .MP3 .WAV .M4A |
-| `duration_exceeded` | 400 | AUDIO TOO LONG. MAX 30 MINUTES |
-| `corrupted_file` | 422 | CORRUPTED FILE. TRY A DIFFERENT ONE |
-| `transcription_failed` | 500 | TRANSCRIPTION FAILED. TRY AGAIN |
-| `synthesis_failed` | 500 | PROCESSING FAILED. TRY AGAIN |
-| `api_rate_limited` | 429 | RATE LIMITED. TRY AGAIN IN {seconds} SECONDS |
-| `api_quota_exhausted` | 402 | API QUOTA EXHAUSTED |
-| `api_key_invalid` | 401 | API KEY INVALID |
-| `connection_lost` | 503 | CONNECTION LOST. TRY AGAIN |
-| `internal_error` | 500 | SOMETHING WENT WRONG. TRY AGAIN |
+
+| Code                   | HTTP Status | User Message                                 |
+| ---------------------- | ----------- | -------------------------------------------- |
+| `file_too_large`       | 400         | FILE TOO CHUNKY. MAX 25MB                    |
+| `invalid_format`       | 400         | CAN'T READ THAT. TRY .MP3 .WAV .M4A          |
+| `duration_exceeded`    | 400         | AUDIO TOO LONG. MAX 30 MINUTES               |
+| `corrupted_file`       | 422         | CORRUPTED FILE. TRY A DIFFERENT ONE          |
+| `transcription_failed` | 500         | TRANSCRIPTION FAILED. TRY AGAIN              |
+| `synthesis_failed`     | 500         | PROCESSING FAILED. TRY AGAIN                 |
+| `api_rate_limited`     | 429         | RATE LIMITED. TRY AGAIN IN {seconds} SECONDS |
+| `api_quota_exhausted`  | 402         | API QUOTA EXHAUSTED                          |
+| `api_key_invalid`      | 401         | API KEY INVALID                              |
+| `connection_lost`      | 503         | CONNECTION LOST. TRY AGAIN                   |
+| `internal_error`       | 500         | SOMETHING WENT WRONG. TRY AGAIN              |
 
 #### File Error Codes (smelt_file_error_code enum)
-| Code | User Message |
-|------|--------------|
-| `file_too_large` | FILE TOO CHUNKY. MAX 25MB |
-| `invalid_format` | CAN'T READ THAT. TRY .MP3 .WAV .M4A |
-| `duration_exceeded` | AUDIO TOO LONG. MAX 30 MINUTES |
-| `corrupted_file` | CORRUPTED FILE. TRY A DIFFERENT ONE |
-| `transcription_failed` | TRANSCRIPTION FAILED FOR THIS FILE |
-| `decoding_failed` | COULDN'T DECODE THIS FILE |
+
+| Code                   | User Message                        |
+| ---------------------- | ----------------------------------- |
+| `file_too_large`       | FILE TOO CHUNKY. MAX 25MB           |
+| `invalid_format`       | CAN'T READ THAT. TRY .MP3 .WAV .M4A |
+| `duration_exceeded`    | AUDIO TOO LONG. MAX 30 MINUTES      |
+| `corrupted_file`       | CORRUPTED FILE. TRY A DIFFERENT ONE |
+| `transcription_failed` | TRANSCRIPTION FAILED FOR THIS FILE  |
+| `decoding_failed`      | COULDN'T DECODE THIS FILE           |
 
 ### 4.4 Security Measures
 

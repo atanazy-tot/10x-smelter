@@ -1,17 +1,21 @@
 /**
  * Unified prompts section that combines default prompts and custom prompts
  * with section management. Card wrapper with neobrutalist styling.
+ * Supports drag-and-drop to move prompts between sections.
  */
 
 import { useEffect } from "react";
 import { ChevronDown, Plus, FolderPlus } from "lucide-react";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { usePromptStore, useAuthStore } from "@/store";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { DefaultPromptsSection } from "./DefaultPromptsSection";
 import { UserSectionsAccordion } from "./UserSectionsAccordion";
-import { PromptItem } from "./PromptItem";
+import { DraggablePromptItem } from "./DraggablePromptItem";
+import { DroppableSection } from "./DroppableSection";
 import { SectionDialog } from "./SectionDialog";
 import { PromptEditor } from "./PromptEditor";
 
@@ -30,6 +34,7 @@ export function UnifiedPromptsSection({ className }: UnifiedPromptsSectionProps)
   const setEditorOpen = usePromptStore((state) => state.setEditorOpen);
   const setSectionDialogOpen = usePromptStore((state) => state.setSectionDialogOpen);
   const selectedPredefinedPrompts = usePromptStore((state) => state.selectedPredefinedPrompts);
+  const movePromptToSection = usePromptStore((state) => state.movePromptToSection);
 
   // Load prompts and sections when authenticated
   useEffect(() => {
@@ -38,6 +43,18 @@ export function UnifiedPromptsSection({ className }: UnifiedPromptsSectionProps)
       loadSections();
     }
   }, [isAuthenticated, loadPrompts, loadSections]);
+
+  // Handle drag end - move prompt to new section
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const promptId = active.id as string;
+    const targetSectionId = over.id === "unsorted" ? null : (over.id as string);
+
+    movePromptToSection(promptId, targetSectionId);
+  };
 
   // Don't render for anonymous users
   if (!isAuthenticated) {
@@ -95,34 +112,40 @@ export function UnifiedPromptsSection({ className }: UnifiedPromptsSectionProps)
                 <p className="font-mono text-sm text-foreground/40 uppercase text-center">LOADING...</p>
               </div>
             ) : (
-              <div className="p-4 flex flex-col gap-4">
-                {/* Default prompts section */}
-                <DefaultPromptsSection />
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <div className="p-4 flex flex-col gap-4">
+                  {/* Default prompts section */}
+                  <DefaultPromptsSection />
 
-                {/* User sections */}
-                <UserSectionsAccordion />
+                  {/* User sections */}
+                  <UserSectionsAccordion />
 
-                {/* Unsorted prompts */}
-                {unsectionedPrompts.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <div className="py-2 font-mono text-xs uppercase tracking-wider text-foreground/60">
-                      UNSORTED ({unsectionedPrompts.length})
+                  {/* Unsorted prompts - droppable area */}
+                  <DroppableSection id="unsorted">
+                    <div className="flex flex-col gap-2">
+                      <div className="py-2 font-mono text-xs uppercase tracking-wider text-foreground/60">
+                        UNSORTED ({unsectionedPrompts.length})
+                      </div>
+                      {unsectionedPrompts.length > 0 ? (
+                        unsectionedPrompts.map((prompt) => <DraggablePromptItem key={prompt.id} prompt={prompt} />)
+                      ) : (
+                        <div className="py-4 border-2 border-dashed border-border/50 text-center">
+                          <p className="font-mono text-xs text-foreground/30 uppercase">DROP PROMPTS HERE</p>
+                        </div>
+                      )}
                     </div>
-                    {unsectionedPrompts.map((prompt) => (
-                      <PromptItem key={prompt.id} prompt={prompt} />
-                    ))}
-                  </div>
-                )}
+                  </DroppableSection>
 
-                {/* Empty state for custom prompts */}
-                {totalCustomPromptCount === 0 && sections.length === 0 && (
-                  <div className="py-4 text-center border-t-2 border-border mt-2">
-                    <FolderPlus className="w-8 h-8 mx-auto mb-2 text-foreground/20" />
-                    <p className="font-mono text-xs text-foreground/40 uppercase">NO CUSTOM PROMPTS YET</p>
-                    <p className="font-mono text-xs text-foreground/30 mt-1">CREATE ONE TO GET STARTED</p>
-                  </div>
-                )}
-              </div>
+                  {/* Empty state for custom prompts */}
+                  {totalCustomPromptCount === 0 && sections.length === 0 && (
+                    <div className="py-4 text-center border-t-2 border-border mt-2">
+                      <FolderPlus className="w-8 h-8 mx-auto mb-2 text-foreground/20" />
+                      <p className="font-mono text-xs text-foreground/40 uppercase">NO CUSTOM PROMPTS YET</p>
+                      <p className="font-mono text-xs text-foreground/30 mt-1">CREATE ONE TO GET STARTED</p>
+                    </div>
+                  )}
+                </div>
+              </DndContext>
             )}
           </CollapsibleContent>
         </Collapsible>

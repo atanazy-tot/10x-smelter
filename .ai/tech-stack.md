@@ -3,6 +3,7 @@
 ## Frontend
 
 ### Astro 5 with React for Interactive Components
+
 - Astro 5 for building fast, efficient pages and applications with minimal JavaScript
 - React 19 provides interactivity where needed
 - TypeScript 5 for static typing and better IDE support
@@ -11,11 +12,13 @@
 - Neobrutalism components (https://www.neobrutalism.dev/) built on Shadcn/ui for UI components
 
 ### State Management
+
 - Zustand for React state management across interactive islands
 
 ## Backend
 
 ### Supabase as Complete Backend Solution
+
 - PostgreSQL database
 - SDK in multiple languages serving as Backend-as-a-Service
 - Open-source solution that can be hosted locally or on own server
@@ -25,6 +28,7 @@
 ## Audio Processing
 
 ### FFmpeg
+
 - Audio format conversion (M4A, AAC to MP3)
 - Server-side processing with temporary file handling
 - Immediate cleanup after processing
@@ -32,6 +36,7 @@
 ## AI Services
 
 ### OpenRouter.ai for LLM Communication
+
 - Access to wide range of models (OpenAI, Anthropic, Google, and others)
 - Enables finding solutions with high efficiency and low costs
 - Financial limits on API keys
@@ -39,12 +44,15 @@
 ## CI/CD and Hosting
 
 ### Version Control
+
 - GitHub for source code repository and project management
 
 ### CI/CD Pipeline
+
 - GitHub Actions for building CI/CD pipelines
 
 ### Containerization
+
 - Docker single container deployment including:
   - Node.js runtime
   - Astro production build
@@ -52,6 +60,7 @@
   - Environment configuration
 
 ### Hosting
+
 - Dokploy via Hostinger for application deployment
 - Docker image deployment
 - Automatic SSL certificates

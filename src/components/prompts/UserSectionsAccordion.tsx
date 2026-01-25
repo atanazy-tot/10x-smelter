@@ -1,11 +1,13 @@
 /**
  * Accordion for user-created sections with edit/delete capabilities.
+ * Supports drag-and-drop for moving prompts between sections.
  */
 
 import { cn } from "@/lib/utils";
 import { usePromptStore } from "@/store";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { PromptItem } from "./PromptItem";
+import { DraggablePromptItem } from "./DraggablePromptItem";
+import { DroppableSection } from "./DroppableSection";
 import { SectionHeader } from "./SectionHeader";
 
 interface UserSectionsAccordionProps {
@@ -30,18 +32,20 @@ export function UserSectionsAccordion({ className }: UserSectionsAccordionProps)
             <AccordionTrigger className="font-mono text-sm uppercase">
               <SectionHeader section={section} />
             </AccordionTrigger>
-            <AccordionContent>
-              {sectionPrompts.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                  {sectionPrompts.map((prompt) => (
-                    <PromptItem key={prompt.id} prompt={prompt} />
-                  ))}
-                </div>
-              ) : (
-                <p className="font-mono text-xs text-foreground/40 uppercase text-center py-2">
-                  NO PROMPTS IN THIS SECTION
-                </p>
-              )}
+            <AccordionContent className="p-0">
+              <DroppableSection id={section.id} className="p-4">
+                {sectionPrompts.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {sectionPrompts.map((prompt) => (
+                      <DraggablePromptItem key={prompt.id} prompt={prompt} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-4 border-2 border-dashed border-border/50 text-center">
+                    <p className="font-mono text-xs text-foreground/30 uppercase">DROP PROMPTS HERE</p>
+                  </div>
+                )}
+              </DroppableSection>
             </AccordionContent>
           </AccordionItem>
         );

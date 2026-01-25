@@ -5,6 +5,7 @@
 Real-time progress updates are delivered via Supabase Realtime subscriptions, not REST endpoints. Clients subscribe to a channel after creating a smelt and receive progress, completion, and error events.
 
 This implementation covers:
+
 - Client-side subscription setup
 - Server-side event broadcasting
 - Event payload structures
@@ -88,25 +89,22 @@ interface SmeltFailedEventPayloadDTO {
 }
 
 // Union type
-type SmeltRealtimeEventDTO =
-  | SmeltProgressEventDTO
-  | SmeltCompletedEventDTO
-  | SmeltFailedEventDTO;
+type SmeltRealtimeEventDTO = SmeltProgressEventDTO | SmeltCompletedEventDTO | SmeltFailedEventDTO;
 ```
 
 ---
 
 ## 4. Processing Stages
 
-| Stage | Percentage Range | Message |
-|-------|------------------|---------|
-| `pending` | 0% | Waiting to process... |
-| `validating` | 0-10% | Validating files... |
-| `decoding` | 10-20% | Decoding audio... |
-| `transcribing` | 20-70% | Transcribing audio... |
-| `synthesizing` | 70-100% | Generating output... |
-| `completed` | 100% | Complete |
-| `failed` | - | Processing failed |
+| Stage          | Percentage Range | Message               |
+| -------------- | ---------------- | --------------------- |
+| `pending`      | 0%               | Waiting to process... |
+| `validating`   | 0-10%            | Validating files...   |
+| `decoding`     | 10-20%           | Decoding audio...     |
+| `transcribing` | 20-70%           | Transcribing audio... |
+| `synthesizing` | 70-100%          | Generating output...  |
+| `completed`    | 100%             | Complete              |
+| `failed`       | -                | Processing failed     |
 
 ---
 
@@ -196,11 +194,7 @@ export function subscribeToSmelt(
 import { useEffect, useRef, useState } from "react";
 import { subscribeToSmelt, type SmeltSubscription } from "@/lib/realtime/smelt-subscription";
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  SmeltProgressEventPayloadDTO,
-  SmeltCompletedEventPayloadDTO,
-  SmeltFailedEventPayloadDTO,
-} from "@/types";
+import type { SmeltProgressEventPayloadDTO, SmeltCompletedEventPayloadDTO, SmeltFailedEventPayloadDTO } from "@/types";
 
 interface SmeltState {
   status: "pending" | "processing" | "completed" | "failed";
@@ -220,10 +214,7 @@ interface SmeltState {
   } | null;
 }
 
-export function useSmeltSubscription(
-  supabase: SupabaseClient,
-  smeltId: string | null
-): SmeltState {
+export function useSmeltSubscription(supabase: SupabaseClient, smeltId: string | null): SmeltState {
   const subscriptionRef = useRef<SmeltSubscription | null>(null);
   const [state, setState] = useState<SmeltState>({
     status: "pending",
@@ -333,10 +324,7 @@ export class SmeltBroadcaster {
     });
   }
 
-  async broadcastCompleted(
-    smeltId: string,
-    results: SmeltResultDTO[]
-  ): Promise<void> {
+  async broadcastCompleted(smeltId: string, results: SmeltResultDTO[]): Promise<void> {
     const channelName = `smelt:${smeltId}`;
 
     const payload: SmeltCompletedEventPayloadDTO = {
@@ -352,11 +340,7 @@ export class SmeltBroadcaster {
     });
   }
 
-  async broadcastFailed(
-    smeltId: string,
-    errorCode: SmeltErrorCode,
-    errorMessage: string
-  ): Promise<void> {
+  async broadcastFailed(smeltId: string, errorCode: SmeltErrorCode, errorMessage: string): Promise<void> {
     const channelName = `smelt:${smeltId}`;
 
     const payload: SmeltFailedEventPayloadDTO = {
@@ -425,7 +409,7 @@ export class ProcessingService {
         await this.broadcaster.broadcastProgress(
           smeltId,
           "transcribing",
-          20 + (i * 0.5), // 20-70%
+          20 + i * 0.5, // 20-70%
           "Transcribing audio...",
           await this.getFileProgress(smeltId)
         );
@@ -448,7 +432,6 @@ export class ProcessingService {
       const results = await this.generateResults(smeltId);
       await this.updateStatus(smeltId, "completed");
       await this.broadcaster.broadcastCompleted(smeltId, results);
-
     } catch (error) {
       // Handle failure
       const errorCode = this.mapErrorCode(error);
@@ -472,10 +455,7 @@ export class ProcessingService {
     if (errorCode) update.error_code = errorCode;
     if (errorMessage) update.error_message = errorMessage;
 
-    await this.supabase
-      .from("smelts")
-      .update(update)
-      .eq("id", smeltId);
+    await this.supabase.from("smelts").update(update).eq("id", smeltId);
   }
 
   private async getFileProgress(smeltId: string): Promise<SmeltFileProgressDTO[]> {
@@ -494,11 +474,16 @@ export class ProcessingService {
 
   private statusToProgress(status: string): number {
     switch (status) {
-      case "pending": return 0;
-      case "processing": return 50;
-      case "completed": return 100;
-      case "failed": return 0;
-      default: return 0;
+      case "pending":
+        return 0;
+      case "processing":
+        return 50;
+      case "completed":
+        return 100;
+      case "failed":
+        return 0;
+      default:
+        return 0;
     }
   }
 
@@ -559,10 +544,10 @@ export class ProcessingService {
 
 ### Connection Errors
 
-| Error | Action |
-|-------|--------|
-| `CHANNEL_ERROR` | Retry subscription or show error to user |
-| `TIMED_OUT` | Retry with exponential backoff |
+| Error           | Action                                               |
+| --------------- | ---------------------------------------------------- |
+| `CHANNEL_ERROR` | Retry subscription or show error to user             |
+| `TIMED_OUT`     | Retry with exponential backoff                       |
 | Connection lost | Attempt to reconnect, poll REST endpoint as fallback |
 
 ### Retry Logic
@@ -582,9 +567,12 @@ export function subscribeWithRetry(
       if (retryCount < maxRetries) {
         retryCount++;
         console.log(`Retrying subscription (${retryCount}/${maxRetries})...`);
-        setTimeout(() => {
-          subscription.subscribe();
-        }, Math.pow(2, retryCount) * 1000); // Exponential backoff
+        setTimeout(
+          () => {
+            subscription.subscribe();
+          },
+          Math.pow(2, retryCount) * 1000
+        ); // Exponential backoff
       } else {
         callbacks.onError?.(error);
       }
@@ -644,10 +632,7 @@ import { useSmeltSubscription } from "@/lib/hooks/useSmeltSubscription";
 import { supabaseClient } from "@/db/supabase.client";
 
 function SmeltProgress({ smeltId }: { smeltId: string }) {
-  const { status, progress, results, error } = useSmeltSubscription(
-    supabaseClient,
-    smeltId
-  );
+  const { status, progress, results, error } = useSmeltSubscription(supabaseClient, smeltId);
 
   if (error) {
     return <div className="error">{error.message}</div>;

@@ -3,7 +3,9 @@
 ## 1. Enums
 
 ### smelt_status
+
 Tracks the processing stages of a smelt operation.
+
 ```sql
 CREATE TYPE smelt_status AS ENUM (
   'pending',
@@ -17,7 +19,9 @@ CREATE TYPE smelt_status AS ENUM (
 ```
 
 ### smelt_mode
+
 Defines how multiple files are processed.
+
 ```sql
 CREATE TYPE smelt_mode AS ENUM (
   'separate',
@@ -26,7 +30,9 @@ CREATE TYPE smelt_mode AS ENUM (
 ```
 
 ### smelt_error_code
+
 Standardized error codes for smelt operations.
+
 ```sql
 CREATE TYPE smelt_error_code AS ENUM (
   'file_too_large',
@@ -44,7 +50,9 @@ CREATE TYPE smelt_error_code AS ENUM (
 ```
 
 ### smelt_file_status
+
 Tracks the processing status of individual input files.
+
 ```sql
 CREATE TYPE smelt_file_status AS ENUM (
   'pending',
@@ -55,7 +63,9 @@ CREATE TYPE smelt_file_status AS ENUM (
 ```
 
 ### smelt_file_error_code
+
 Standardized error codes for individual file processing.
+
 ```sql
 CREATE TYPE smelt_file_error_code AS ENUM (
   'file_too_large',
@@ -68,7 +78,9 @@ CREATE TYPE smelt_file_error_code AS ENUM (
 ```
 
 ### input_type
+
 Defines the type of input for processing.
+
 ```sql
 CREATE TYPE input_type AS ENUM (
   'audio',
@@ -77,7 +89,9 @@ CREATE TYPE input_type AS ENUM (
 ```
 
 ### default_prompt_name
+
 The 5 predefined prompts available to all users (content hardcoded in application).
+
 ```sql
 CREATE TYPE default_prompt_name AS ENUM (
   'summarize',
@@ -89,7 +103,9 @@ CREATE TYPE default_prompt_name AS ENUM (
 ```
 
 ### api_key_status
+
 Tracks the validation status of a user's API key.
+
 ```sql
 CREATE TYPE api_key_status AS ENUM (
   'none',
@@ -104,18 +120,19 @@ CREATE TYPE api_key_status AS ENUM (
 ## 2. Tables
 
 ### user_profiles
+
 Extends Supabase auth.users with application-specific data. One-to-one relationship with auth.users.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| user_id | uuid | PRIMARY KEY, REFERENCES auth.users(id) ON DELETE CASCADE | Links to Supabase auth |
-| credits_remaining | integer | NOT NULL DEFAULT 5, CHECK (credits_remaining >= 0) | Current weekly credit balance |
-| weekly_credits_max | integer | NOT NULL DEFAULT 5 | Maximum credits per week |
-| credits_reset_at | timestamptz | NOT NULL | Next credit reset timestamp |
-| api_key_status | api_key_status | NOT NULL DEFAULT 'none' | Status of user's API key |
-| api_key_validated_at | timestamptz | NULL | When API key was last validated |
-| created_at | timestamptz | NOT NULL DEFAULT now() | Profile creation timestamp |
-| updated_at | timestamptz | NOT NULL DEFAULT now() | Last update timestamp |
+| Column               | Type           | Constraints                                              | Description                     |
+| -------------------- | -------------- | -------------------------------------------------------- | ------------------------------- |
+| user_id              | uuid           | PRIMARY KEY, REFERENCES auth.users(id) ON DELETE CASCADE | Links to Supabase auth          |
+| credits_remaining    | integer        | NOT NULL DEFAULT 5, CHECK (credits_remaining >= 0)       | Current weekly credit balance   |
+| weekly_credits_max   | integer        | NOT NULL DEFAULT 5                                       | Maximum credits per week        |
+| credits_reset_at     | timestamptz    | NOT NULL                                                 | Next credit reset timestamp     |
+| api_key_status       | api_key_status | NOT NULL DEFAULT 'none'                                  | Status of user's API key        |
+| api_key_validated_at | timestamptz    | NULL                                                     | When API key was last validated |
+| created_at           | timestamptz    | NOT NULL DEFAULT now()                                   | Profile creation timestamp      |
+| updated_at           | timestamptz    | NOT NULL DEFAULT now()                                   | Last update timestamp           |
 
 ```sql
 CREATE TABLE user_profiles (
@@ -133,14 +150,15 @@ CREATE TABLE user_profiles (
 ---
 
 ### user_api_keys
+
 Stores encrypted API keys for users who want unlimited processing. One-to-one with user_profiles.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| user_id | uuid | PRIMARY KEY, REFERENCES auth.users(id) ON DELETE CASCADE | Links to user |
-| encrypted_key | text | NOT NULL | Encrypted OpenAI API key |
-| created_at | timestamptz | NOT NULL DEFAULT now() | Key creation timestamp |
-| updated_at | timestamptz | NOT NULL DEFAULT now() | Last update timestamp |
+| Column        | Type        | Constraints                                              | Description              |
+| ------------- | ----------- | -------------------------------------------------------- | ------------------------ |
+| user_id       | uuid        | PRIMARY KEY, REFERENCES auth.users(id) ON DELETE CASCADE | Links to user            |
+| encrypted_key | text        | NOT NULL                                                 | Encrypted OpenAI API key |
+| created_at    | timestamptz | NOT NULL DEFAULT now()                                   | Key creation timestamp   |
+| updated_at    | timestamptz | NOT NULL DEFAULT now()                                   | Last update timestamp    |
 
 ```sql
 CREATE TABLE user_api_keys (
@@ -154,16 +172,17 @@ CREATE TABLE user_api_keys (
 ---
 
 ### prompt_sections
+
 User-defined sections/dividers for organizing custom prompts. Many-to-one with auth.users.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | uuid | PRIMARY KEY DEFAULT gen_random_uuid() | Unique section identifier |
-| user_id | uuid | NOT NULL, REFERENCES auth.users(id) ON DELETE CASCADE | Owner of the section |
-| title | text | NOT NULL | Section display name |
-| position | integer | NOT NULL DEFAULT 0 | Order position in UI |
-| created_at | timestamptz | NOT NULL DEFAULT now() | Section creation timestamp |
-| updated_at | timestamptz | NOT NULL DEFAULT now() | Last update timestamp |
+| Column     | Type        | Constraints                                           | Description                |
+| ---------- | ----------- | ----------------------------------------------------- | -------------------------- |
+| id         | uuid        | PRIMARY KEY DEFAULT gen_random_uuid()                 | Unique section identifier  |
+| user_id    | uuid        | NOT NULL, REFERENCES auth.users(id) ON DELETE CASCADE | Owner of the section       |
+| title      | text        | NOT NULL                                              | Section display name       |
+| position   | integer     | NOT NULL DEFAULT 0                                    | Order position in UI       |
+| created_at | timestamptz | NOT NULL DEFAULT now()                                | Section creation timestamp |
+| updated_at | timestamptz | NOT NULL DEFAULT now()                                | Last update timestamp      |
 
 ```sql
 CREATE TABLE prompt_sections (
@@ -179,18 +198,19 @@ CREATE TABLE prompt_sections (
 ---
 
 ### prompts
+
 User-created custom prompts. Many-to-one with auth.users, optional many-to-one with prompt_sections.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | uuid | PRIMARY KEY DEFAULT gen_random_uuid() | Unique prompt identifier |
-| user_id | uuid | NOT NULL, REFERENCES auth.users(id) ON DELETE CASCADE | Owner of the prompt |
-| section_id | uuid | NULL, REFERENCES prompt_sections(id) ON DELETE SET NULL | Optional section grouping |
-| title | text | NOT NULL | Prompt display name |
-| body | text | NOT NULL, CHECK (char_length(body) <= 4000) | Prompt content (max 4000 chars) |
-| position | integer | NOT NULL DEFAULT 0 | Order position within section |
-| created_at | timestamptz | NOT NULL DEFAULT now() | Prompt creation timestamp |
-| updated_at | timestamptz | NOT NULL DEFAULT now() | Last update timestamp |
+| Column     | Type        | Constraints                                             | Description                     |
+| ---------- | ----------- | ------------------------------------------------------- | ------------------------------- |
+| id         | uuid        | PRIMARY KEY DEFAULT gen_random_uuid()                   | Unique prompt identifier        |
+| user_id    | uuid        | NOT NULL, REFERENCES auth.users(id) ON DELETE CASCADE   | Owner of the prompt             |
+| section_id | uuid        | NULL, REFERENCES prompt_sections(id) ON DELETE SET NULL | Optional section grouping       |
+| title      | text        | NOT NULL                                                | Prompt display name             |
+| body       | text        | NOT NULL, CHECK (char_length(body) <= 4000)             | Prompt content (max 4000 chars) |
+| position   | integer     | NOT NULL DEFAULT 0                                      | Order position within section   |
+| created_at | timestamptz | NOT NULL DEFAULT now()                                  | Prompt creation timestamp       |
+| updated_at | timestamptz | NOT NULL DEFAULT now()                                  | Last update timestamp           |
 
 ```sql
 CREATE TABLE prompts (
@@ -208,20 +228,21 @@ CREATE TABLE prompts (
 ---
 
 ### smelts
+
 Main processing operations table. Many-to-one with auth.users (nullable for anonymous).
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | uuid | PRIMARY KEY DEFAULT gen_random_uuid() | Unique smelt identifier |
-| user_id | uuid | NULL, REFERENCES auth.users(id) ON DELETE SET NULL | Owner (null for anonymous) |
-| status | smelt_status | NOT NULL DEFAULT 'pending' | Current processing status |
-| mode | smelt_mode | NOT NULL DEFAULT 'separate' | Processing mode |
-| default_prompt_names | default_prompt_name[] | NOT NULL DEFAULT '{}' | Selected predefined prompts |
-| user_prompt_id | uuid | NULL, REFERENCES prompts(id) ON DELETE SET NULL | Selected custom prompt |
-| error_code | smelt_error_code | NULL | Error code if failed |
-| error_message | text | NULL | Human-readable error details |
-| created_at | timestamptz | NOT NULL DEFAULT now() | Smelt initiation timestamp |
-| completed_at | timestamptz | NULL | Processing completion timestamp |
+| Column               | Type                  | Constraints                                        | Description                     |
+| -------------------- | --------------------- | -------------------------------------------------- | ------------------------------- |
+| id                   | uuid                  | PRIMARY KEY DEFAULT gen_random_uuid()              | Unique smelt identifier         |
+| user_id              | uuid                  | NULL, REFERENCES auth.users(id) ON DELETE SET NULL | Owner (null for anonymous)      |
+| status               | smelt_status          | NOT NULL DEFAULT 'pending'                         | Current processing status       |
+| mode                 | smelt_mode            | NOT NULL DEFAULT 'separate'                        | Processing mode                 |
+| default_prompt_names | default_prompt_name[] | NOT NULL DEFAULT '{}'                              | Selected predefined prompts     |
+| user_prompt_id       | uuid                  | NULL, REFERENCES prompts(id) ON DELETE SET NULL    | Selected custom prompt          |
+| error_code           | smelt_error_code      | NULL                                               | Error code if failed            |
+| error_message        | text                  | NULL                                               | Human-readable error details    |
+| created_at           | timestamptz           | NOT NULL DEFAULT now()                             | Smelt initiation timestamp      |
+| completed_at         | timestamptz           | NULL                                               | Processing completion timestamp |
 
 ```sql
 CREATE TABLE smelts (
@@ -241,21 +262,22 @@ CREATE TABLE smelts (
 ---
 
 ### smelt_files
+
 Individual input files/text for a smelt operation. Many-to-one with smelts.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | uuid | PRIMARY KEY DEFAULT gen_random_uuid() | Unique file identifier |
-| smelt_id | uuid | NOT NULL, REFERENCES smelts(id) ON DELETE CASCADE | Parent smelt operation |
-| input_type | input_type | NOT NULL | Type of input (audio/text) |
-| filename | text | NULL | Original filename (audio only) |
-| size_bytes | integer | NULL | File size in bytes |
-| duration_seconds | integer | NULL | Audio duration (audio only) |
-| status | smelt_file_status | NOT NULL DEFAULT 'pending' | Processing status |
-| error_code | smelt_file_error_code | NULL | Error code if failed |
-| position | integer | NOT NULL DEFAULT 0 | Order for combine mode |
-| created_at | timestamptz | NOT NULL DEFAULT now() | Record creation timestamp |
-| completed_at | timestamptz | NULL | Processing completion timestamp |
+| Column           | Type                  | Constraints                                       | Description                     |
+| ---------------- | --------------------- | ------------------------------------------------- | ------------------------------- |
+| id               | uuid                  | PRIMARY KEY DEFAULT gen_random_uuid()             | Unique file identifier          |
+| smelt_id         | uuid                  | NOT NULL, REFERENCES smelts(id) ON DELETE CASCADE | Parent smelt operation          |
+| input_type       | input_type            | NOT NULL                                          | Type of input (audio/text)      |
+| filename         | text                  | NULL                                              | Original filename (audio only)  |
+| size_bytes       | integer               | NULL                                              | File size in bytes              |
+| duration_seconds | integer               | NULL                                              | Audio duration (audio only)     |
+| status           | smelt_file_status     | NOT NULL DEFAULT 'pending'                        | Processing status               |
+| error_code       | smelt_file_error_code | NULL                                              | Error code if failed            |
+| position         | integer               | NOT NULL DEFAULT 0                                | Order for combine mode          |
+| created_at       | timestamptz           | NOT NULL DEFAULT now()                            | Record creation timestamp       |
+| completed_at     | timestamptz           | NULL                                              | Processing completion timestamp |
 
 ```sql
 CREATE TABLE smelt_files (
@@ -276,12 +298,13 @@ CREATE TABLE smelt_files (
 ---
 
 ### anonymous_usage
+
 Tracks daily usage for anonymous users by hashed IP address.
 
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| ip_hash | text | NOT NULL | SHA-256 hash of IP address |
-| date_utc | date | NOT NULL | Date of usage (UTC) |
+| Column      | Type    | Constraints        | Description                   |
+| ----------- | ------- | ------------------ | ----------------------------- |
+| ip_hash     | text    | NOT NULL           | SHA-256 hash of IP address    |
+| date_utc    | date    | NOT NULL           | Date of usage (UTC)           |
 | smelts_used | integer | NOT NULL DEFAULT 1 | Number of smelts on this date |
 
 ```sql
@@ -341,16 +364,16 @@ CREATE TABLE anonymous_usage (
 
 ### Relationship Summary
 
-| Parent Table | Child Table | Cardinality | FK Column | On Delete |
-|--------------|-------------|-------------|-----------|-----------|
-| auth.users | user_profiles | 1:1 | user_id | CASCADE |
-| auth.users | user_api_keys | 1:1 | user_id | CASCADE |
-| auth.users | prompt_sections | 1:N | user_id | CASCADE |
-| auth.users | prompts | 1:N | user_id | CASCADE |
-| auth.users | smelts | 1:N (nullable) | user_id | SET NULL |
-| prompt_sections | prompts | 1:N (optional) | section_id | SET NULL |
-| prompts | smelts | 1:N (optional) | user_prompt_id | SET NULL |
-| smelts | smelt_files | 1:N | smelt_id | CASCADE |
+| Parent Table    | Child Table     | Cardinality    | FK Column      | On Delete |
+| --------------- | --------------- | -------------- | -------------- | --------- |
+| auth.users      | user_profiles   | 1:1            | user_id        | CASCADE   |
+| auth.users      | user_api_keys   | 1:1            | user_id        | CASCADE   |
+| auth.users      | prompt_sections | 1:N            | user_id        | CASCADE   |
+| auth.users      | prompts         | 1:N            | user_id        | CASCADE   |
+| auth.users      | smelts          | 1:N (nullable) | user_id        | SET NULL  |
+| prompt_sections | prompts         | 1:N (optional) | section_id     | SET NULL  |
+| prompts         | smelts          | 1:N (optional) | user_prompt_id | SET NULL  |
+| smelts          | smelt_files     | 1:N            | smelt_id       | CASCADE   |
 
 ---
 
@@ -360,20 +383,20 @@ CREATE TABLE anonymous_usage (
 
 ```sql
 -- Prompt ordering within user library
-CREATE INDEX idx_prompts_user_section_position 
+CREATE INDEX idx_prompts_user_section_position
   ON prompts (user_id, section_id, position);
 
 -- Section ordering within user library
-CREATE INDEX idx_prompt_sections_user_position 
+CREATE INDEX idx_prompt_sections_user_position
   ON prompt_sections (user_id, position);
 
 -- Fast lookup of recent completed smelts per user (for analytics/history)
-CREATE INDEX idx_smelts_user_completed 
-  ON smelts (user_id, created_at DESC) 
+CREATE INDEX idx_smelts_user_completed
+  ON smelts (user_id, created_at DESC)
   WHERE status = 'completed';
 
 -- Smelt files by parent smelt (already covered by FK, but explicit for ordering)
-CREATE INDEX idx_smelt_files_smelt_position 
+CREATE INDEX idx_smelt_files_smelt_position
   ON smelt_files (smelt_id, position);
 
 -- Anonymous usage lookup (composite PK serves as index, but explicit for clarity)
@@ -551,8 +574,8 @@ CREATE POLICY "Users can view own smelt files"
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM smelts 
-      WHERE smelts.id = smelt_files.smelt_id 
+      SELECT 1 FROM smelts
+      WHERE smelts.id = smelt_files.smelt_id
       AND smelts.user_id = auth.uid()
     )
   );
@@ -563,8 +586,8 @@ CREATE POLICY "Users can insert own smelt files"
   TO authenticated
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM smelts 
-      WHERE smelts.id = smelt_files.smelt_id 
+      SELECT 1 FROM smelts
+      WHERE smelts.id = smelt_files.smelt_id
       AND smelts.user_id = auth.uid()
     )
   );
@@ -575,8 +598,8 @@ CREATE POLICY "Anonymous can insert smelt files"
   TO anon
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM smelts 
-      WHERE smelts.id = smelt_files.smelt_id 
+      SELECT 1 FROM smelts
+      WHERE smelts.id = smelt_files.smelt_id
       AND smelts.user_id IS NULL
     )
   );
@@ -686,11 +709,11 @@ CREATE TRIGGER update_prompts_updated_at
 
 ### Constraints Summary
 
-| Table | Constraint | Purpose |
-|-------|-----------|---------|
-| user_profiles | credits_remaining >= 0 | Prevent negative credits |
-| prompts | char_length(body) <= 4000 | Enforce prompt length limit |
-| anonymous_usage | composite PK (ip_hash, date_utc) | Unique daily usage per IP |
+| Table           | Constraint                       | Purpose                     |
+| --------------- | -------------------------------- | --------------------------- |
+| user_profiles   | credits_remaining >= 0           | Prevent negative credits    |
+| prompts         | char_length(body) <= 4000        | Enforce prompt length limit |
+| anonymous_usage | composite PK (ip_hash, date_utc) | Unique daily usage per IP   |
 
 ### Future Considerations
 

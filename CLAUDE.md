@@ -21,6 +21,7 @@ Node version is pinned to 22.14.0 (see `.nvmrc`).
 ## Architecture
 
 ### Tech Stack
+
 - **Frontend**: Astro 5 + React 19 + TypeScript 5 + Tailwind CSS 4 + Shadcn/ui
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime WebSockets)
 - **AI**: OpenRouter.ai for LLM communication
@@ -58,6 +59,7 @@ supabase/
 **Supabase Types**: Import `SupabaseClient` from `src/db/supabase.client.ts`, not from `@supabase/supabase-js`.
 
 **Anonymous vs Authenticated**:
+
 - Anonymous users tracked by IP hash via SECURITY DEFINER RPC functions (bypass RLS)
 - Authenticated users use direct database writes with RLS
 

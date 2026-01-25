@@ -4,9 +4,9 @@
 
 The Usage endpoint provides current usage status for both anonymous and authenticated users. It returns different response shapes based on the user's authentication status and whether they have an API key configured.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/usage` | GET | Get current usage status |
+| Endpoint     | Method | Description              |
+| ------------ | ------ | ------------------------ |
+| `/api/usage` | GET    | Get current usage status |
 
 ---
 
@@ -111,6 +111,7 @@ export type UsageResponse = z.infer<typeof usageResponseSchema>;
 ### GET /api/usage
 
 **Success - Anonymous (200 OK)**:
+
 ```json
 {
   "type": "anonymous",
@@ -122,6 +123,7 @@ export type UsageResponse = z.infer<typeof usageResponseSchema>;
 ```
 
 **Success - Authenticated Free Tier (200 OK)**:
+
 ```json
 {
   "type": "authenticated",
@@ -134,6 +136,7 @@ export type UsageResponse = z.infer<typeof usageResponseSchema>;
 ```
 
 **Success - Authenticated Limit Reached (200 OK)**:
+
 ```json
 {
   "type": "authenticated",
@@ -147,6 +150,7 @@ export type UsageResponse = z.infer<typeof usageResponseSchema>;
 ```
 
 **Success - Unlimited (200 OK)**:
+
 ```json
 {
   "type": "unlimited",
@@ -244,10 +248,10 @@ interface ErrorResponse {
 
 ### Error Scenarios
 
-| Scenario | Status | Code | Message |
-|----------|--------|------|---------|
-| Database error | 500 | `internal_error` | SOMETHING WENT WRONG. TRY AGAIN |
-| Profile not found | 500 | `internal_error` | SOMETHING WENT WRONG. TRY AGAIN |
+| Scenario          | Status | Code             | Message                         |
+| ----------------- | ------ | ---------------- | ------------------------------- |
+| Database error    | 500    | `internal_error` | SOMETHING WENT WRONG. TRY AGAIN |
+| Profile not found | 500    | `internal_error` | SOMETHING WENT WRONG. TRY AGAIN |
 
 Note: This endpoint should never return 401 as it's designed to work for anonymous users.
 
@@ -321,12 +325,7 @@ export type UsageResponse = z.infer<typeof usageResponseSchema>;
 
 ```typescript
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  UsageDTO,
-  UsageAnonymousDTO,
-  UsageAuthenticatedDTO,
-  UsageUnlimitedDTO,
-} from "@/types";
+import type { UsageDTO, UsageAnonymousDTO, UsageAuthenticatedDTO, UsageUnlimitedDTO } from "@/types";
 import { createHash } from "crypto";
 
 const ANONYMOUS_DAILY_LIMIT = 1;
@@ -413,9 +412,7 @@ export class UsageService {
     }
 
     // Calculate days until reset
-    const daysUntilReset = Math.ceil(
-      (creditsResetAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const daysUntilReset = Math.ceil((creditsResetAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     const canProcess = creditsRemaining > 0;
     const creditsUsed = profile.weekly_credits_max - creditsRemaining;
@@ -469,13 +466,16 @@ export const prerender = false;
 export async function GET(context: APIContext) {
   try {
     // Get user (may be null for anonymous)
-    const { data: { user } } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await context.locals.supabase.auth.getUser();
     const userId = user?.id ?? null;
 
     // Get client IP for anonymous users
-    const clientIp = context.request.headers.get("x-forwarded-for")?.split(",")[0]
-      ?? context.request.headers.get("x-real-ip")
-      ?? "unknown";
+    const clientIp =
+      context.request.headers.get("x-forwarded-for")?.split(",")[0] ??
+      context.request.headers.get("x-real-ip") ??
+      "unknown";
 
     const usageService = new UsageService(context.locals.supabase);
     const usage = await usageService.getUsage(userId, clientIp);

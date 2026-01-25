@@ -10,13 +10,14 @@ This document summarizes the migration of LLM processing services from the Pytho
 
 ### Phase 1: Core LLM Infrastructure
 
-| File | Purpose |
-|------|---------|
-| `src/lib/services/llm/types.ts` | TypeScript types for OpenRouter API requests/responses |
+| File                                        | Purpose                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `src/lib/services/llm/types.ts`             | TypeScript types for OpenRouter API requests/responses                |
 | `src/lib/services/llm/openrouter.client.ts` | API client with retry logic, exponential backoff, rate limit handling |
-| `src/lib/services/llm/index.ts` | Module exports |
+| `src/lib/services/llm/index.ts`             | Module exports                                                        |
 
 **Error Types Added** to `src/lib/utils/errors.ts`:
+
 - `LLMTimeoutError` - Request timeout (504)
 - `LLMRateLimitError` - Rate limit exceeded (429)
 - `LLMAPIError` - Generic API error (502)
@@ -30,50 +31,51 @@ This document summarizes the migration of LLM processing services from the Pytho
 
 ### Phase 2: Audio Processing
 
-| File | Purpose |
-|------|---------|
-| `src/lib/services/audio/validation.ts` | Format, size, and duration validation per PRD limits |
-| `src/lib/services/audio/conversion.ts` | FFmpeg integration for audio-to-MP3 conversion |
-| `src/lib/services/audio/transcription.ts` | Audio-to-text using Gemini 2.5 Pro via OpenRouter |
-| `src/lib/services/audio/index.ts` | Module exports |
+| File                                      | Purpose                                              |
+| ----------------------------------------- | ---------------------------------------------------- |
+| `src/lib/services/audio/validation.ts`    | Format, size, and duration validation per PRD limits |
+| `src/lib/services/audio/conversion.ts`    | FFmpeg integration for audio-to-MP3 conversion       |
+| `src/lib/services/audio/transcription.ts` | Audio-to-text using Gemini 2.5 Pro via OpenRouter    |
+| `src/lib/services/audio/index.ts`         | Module exports                                       |
 
 **Supported Formats**: MP3, WAV, M4A, OGG, FLAC, AAC, WebM
 
 **Limits**:
+
 - Max file size: 25 MB
 - Max duration: 30 minutes
 
 ### Phase 3: Synthesis & Prompts
 
-| File | Purpose |
-|------|---------|
-| `src/lib/prompts/predefined/summarize.md` | Executive summary with key points |
-| `src/lib/prompts/predefined/action_items.md` | Extract todos and action items |
-| `src/lib/prompts/predefined/detailed_notes.md` | Structured notes with headers |
-| `src/lib/prompts/predefined/qa_format.md` | Question and answer format |
-| `src/lib/prompts/predefined/table_of_contents.md` | Overview with section outline |
-| `src/lib/services/prompts/loader.ts` | Loads predefined and custom prompts |
-| `src/lib/services/prompts/index.ts` | Module exports |
+| File                                              | Purpose                                |
+| ------------------------------------------------- | -------------------------------------- |
+| `src/lib/prompts/predefined/summarize.md`         | Executive summary with key points      |
+| `src/lib/prompts/predefined/action_items.md`      | Extract todos and action items         |
+| `src/lib/prompts/predefined/detailed_notes.md`    | Structured notes with headers          |
+| `src/lib/prompts/predefined/qa_format.md`         | Question and answer format             |
+| `src/lib/prompts/predefined/table_of_contents.md` | Overview with section outline          |
+| `src/lib/services/prompts/loader.ts`              | Loads predefined and custom prompts    |
+| `src/lib/services/prompts/index.ts`               | Module exports                         |
 | `src/lib/services/synthesis/synthesis.service.ts` | Applies prompts to transcribed content |
-| `src/lib/services/synthesis/index.ts` | Module exports |
+| `src/lib/services/synthesis/index.ts`             | Module exports                         |
 
 ### Phase 4: Storage & Integration
 
-| File | Purpose |
-|------|---------|
+| File                                       | Purpose                                   |
+| ------------------------------------------ | ----------------------------------------- |
 | `src/lib/services/storage/file-storage.ts` | Supabase Storage for file upload/download |
-| `src/lib/services/storage/index.ts` | Module exports |
+| `src/lib/services/storage/index.ts`        | Module exports                            |
 
 ---
 
 ## Files Modified
 
-| File | Changes |
-|------|---------|
-| `src/lib/realtime/processing.service.ts` | Full pipeline implementation replacing TODOs |
-| `src/lib/services/smelts.service.ts` | Added file upload to Supabase Storage during smelt creation |
-| `src/lib/utils/errors.ts` | Added LLM and audio processing error classes |
-| `package.json` | Added fluent-ffmpeg dependencies |
+| File                                     | Changes                                                     |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| `src/lib/realtime/processing.service.ts` | Full pipeline implementation replacing TODOs                |
+| `src/lib/services/smelts.service.ts`     | Added file upload to Supabase Storage during smelt creation |
+| `src/lib/utils/errors.ts`                | Added LLM and audio processing error classes                |
+| `package.json`                           | Added fluent-ffmpeg dependencies                            |
 
 ---
 
@@ -93,11 +95,13 @@ npm install -D @types/fluent-ffmpeg
 ### Migration File
 
 A migration file has been created at:
+
 ```
 supabase/migrations/20260119000000_create_smelt_files_storage.sql
 ```
 
 This migration:
+
 1. Creates the `smelt-files` storage bucket (private, 25MB limit)
 2. Configures allowed MIME types for audio and text files
 3. Creates a helper function `public.get_smelt_id_from_path()` for RLS
@@ -228,10 +232,10 @@ The system supports two modes:
 
 ## Models Used
 
-| Purpose | Model | Provider |
-|---------|-------|----------|
+| Purpose       | Model                           | Provider   |
+| ------------- | ------------------------------- | ---------- |
 | Transcription | `google/gemini-2.5-pro-preview` | OpenRouter |
-| Synthesis | `anthropic/claude-3.5-sonnet` | OpenRouter |
+| Synthesis     | `anthropic/claude-3.5-sonnet`   | OpenRouter |
 
 ---
 

@@ -4,15 +4,15 @@
 
 Prompts endpoints manage user-created custom prompts for audio/text processing. Prompts can optionally belong to sections and can be uploaded from markdown files.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/prompts` | GET | List all prompts with pagination |
-| `/api/prompts` | POST | Create new prompt |
-| `/api/prompts/:id` | GET | Get single prompt |
-| `/api/prompts/:id` | PATCH | Update prompt |
-| `/api/prompts/:id` | DELETE | Delete prompt |
-| `/api/prompts/upload` | POST | Create prompt from .MD file |
-| `/api/prompts/reorder` | PATCH | Reorder prompts within section |
+| Endpoint               | Method | Description                      |
+| ---------------------- | ------ | -------------------------------- |
+| `/api/prompts`         | GET    | List all prompts with pagination |
+| `/api/prompts`         | POST   | Create new prompt                |
+| `/api/prompts/:id`     | GET    | Get single prompt                |
+| `/api/prompts/:id`     | PATCH  | Update prompt                    |
+| `/api/prompts/:id`     | DELETE | Delete prompt                    |
+| `/api/prompts/upload`  | POST   | Create prompt from .MD file      |
+| `/api/prompts/reorder` | PATCH  | Reorder prompts within section   |
 
 ---
 
@@ -41,6 +41,7 @@ Prompts endpoints manage user-created custom prompts for audio/text processing. 
   - `Authorization: Bearer <access_token>` (required)
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "title": "Interview Notes",
@@ -69,6 +70,7 @@ Prompts endpoints manage user-created custom prompts for audio/text processing. 
 - **Path Parameters**:
   - `id` - Prompt UUID
 - **Request Body**:
+
 ```json
 {
   "title": "Updated Interview Notes",
@@ -107,6 +109,7 @@ Prompts endpoints manage user-created custom prompts for audio/text processing. 
   - `Authorization: Bearer <access_token>` (required)
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "section_id": "uuid",
@@ -206,14 +209,8 @@ export const listPromptsQuerySchema = z.object({
 
 // Create prompt
 export const promptCreateSchema = z.object({
-  title: z
-    .string()
-    .min(1, "PROMPT TITLE REQUIRED")
-    .max(200, "PROMPT TITLE TOO LONG"),
-  body: z
-    .string()
-    .min(1, "PROMPT CONTENT REQUIRED")
-    .max(4000, "PROMPT TOO LONG. KEEP IT UNDER 4,000 CHARS"),
+  title: z.string().min(1, "PROMPT TITLE REQUIRED").max(200, "PROMPT TITLE TOO LONG"),
+  body: z.string().min(1, "PROMPT CONTENT REQUIRED").max(4000, "PROMPT TOO LONG. KEEP IT UNDER 4,000 CHARS"),
   section_id: z.string().uuid().nullable().optional(),
   position: z.number().int().min(0).optional(),
 });
@@ -263,6 +260,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### GET /api/prompts
 
 **Success (200 OK)**:
+
 ```json
 {
   "prompts": [
@@ -293,6 +291,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### POST /api/prompts
 
 **Success (201 Created)**:
+
 ```json
 {
   "id": "uuid",
@@ -317,6 +316,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### GET /api/prompts/:id
 
 **Success (200 OK)**:
+
 ```json
 {
   "id": "uuid",
@@ -338,6 +338,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### PATCH /api/prompts/:id
 
 **Success (200 OK)**:
+
 ```json
 {
   "id": "uuid",
@@ -360,6 +361,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### DELETE /api/prompts/:id
 
 **Success (200 OK)**:
+
 ```json
 {
   "message": "PROMPT DELETED"
@@ -375,6 +377,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### POST /api/prompts/upload
 
 **Success (201 Created)**:
+
 ```json
 {
   "id": "uuid",
@@ -398,6 +401,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 ### PATCH /api/prompts/reorder
 
 **Success (200 OK)**:
+
 ```json
 {
   "message": "PROMPTS REORDERED",
@@ -635,12 +639,7 @@ export type PromptsReorderInput = z.infer<typeof promptsReorderSchema>;
 
 ```typescript
 import type { SupabaseClient } from "@/db/supabase.client";
-import type {
-  PromptDTO,
-  PromptsListDTO,
-  PromptDeleteResponseDTO,
-  ReorderResponseDTO,
-} from "@/types";
+import type { PromptDTO, PromptsListDTO, PromptDeleteResponseDTO, ReorderResponseDTO } from "@/types";
 import type {
   ListPromptsQuery,
   PromptCreateInput,
@@ -659,10 +658,7 @@ export class PromptsService {
     const offset = (page - 1) * limit;
 
     // Build query
-    let queryBuilder = this.supabase
-      .from("prompts")
-      .select("*", { count: "exact" })
-      .eq("user_id", userId);
+    let queryBuilder = this.supabase.from("prompts").select("*", { count: "exact" }).eq("user_id", userId);
 
     // Filter by section
     if (section_id !== undefined) {
@@ -759,11 +755,7 @@ export class PromptsService {
     };
   }
 
-  async updatePrompt(
-    userId: string,
-    promptId: string,
-    input: PromptUpdateInput
-  ): Promise<PromptDTO> {
+  async updatePrompt(userId: string, promptId: string, input: PromptUpdateInput): Promise<PromptDTO> {
     // Verify prompt ownership
     const { data: existing } = await this.supabase
       .from("prompts")
@@ -788,12 +780,7 @@ export class PromptsService {
     if (input.section_id !== undefined) updateData.section_id = input.section_id;
     if (input.position !== undefined) updateData.position = input.position;
 
-    const { data, error } = await this.supabase
-      .from("prompts")
-      .update(updateData)
-      .eq("id", promptId)
-      .select()
-      .single();
+    const { data, error } = await this.supabase.from("prompts").update(updateData).eq("id", promptId).select().single();
 
     if (error) throw error;
 
@@ -820,10 +807,7 @@ export class PromptsService {
       throw new PromptNotFoundError();
     }
 
-    const { error } = await this.supabase
-      .from("prompts")
-      .delete()
-      .eq("id", promptId);
+    const { error } = await this.supabase.from("prompts").delete().eq("id", promptId);
 
     if (error) throw error;
 
@@ -864,19 +848,12 @@ export class PromptsService {
     });
   }
 
-  async reorderPrompts(
-    userId: string,
-    input: PromptsReorderInput
-  ): Promise<ReorderResponseDTO> {
+  async reorderPrompts(userId: string, input: PromptsReorderInput): Promise<ReorderResponseDTO> {
     const { section_id, order } = input;
     const promptIds = order.map((item) => item.id);
 
     // Verify all prompts exist, belong to user, and are in the specified section
-    let queryBuilder = this.supabase
-      .from("prompts")
-      .select("id")
-      .eq("user_id", userId)
-      .in("id", promptIds);
+    let queryBuilder = this.supabase.from("prompts").select("id").eq("user_id", userId).in("id", promptIds);
 
     if (section_id === null) {
       queryBuilder = queryBuilder.is("section_id", null);
@@ -923,10 +900,7 @@ export class PromptsService {
   }
 
   private async getNextPosition(userId: string, sectionId: string | null): Promise<number> {
-    let queryBuilder = this.supabase
-      .from("prompts")
-      .select("position")
-      .eq("user_id", userId);
+    let queryBuilder = this.supabase.from("prompts").select("position").eq("user_id", userId);
 
     if (sectionId === null) {
       queryBuilder = queryBuilder.is("section_id", null);
@@ -934,10 +908,7 @@ export class PromptsService {
       queryBuilder = queryBuilder.eq("section_id", sectionId);
     }
 
-    const { data } = await queryBuilder
-      .order("position", { ascending: false })
-      .limit(1)
-      .single();
+    const { data } = await queryBuilder.order("position", { ascending: false }).limit(1).single();
 
     return (data?.position ?? -1) + 1;
   }
@@ -993,13 +964,16 @@ export const prerender = false;
 
 export async function GET(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const url = new URL(context.request.url);
@@ -1015,12 +989,14 @@ export async function GET(context: APIContext) {
     if (!validation.success) {
       // Use defaults for invalid params
     }
-    const query = validation.success ? validation.data : {
-      sort: "position" as const,
-      order: "asc" as const,
-      page: 1,
-      limit: 50,
-    };
+    const query = validation.success
+      ? validation.data
+      : {
+          sort: "position" as const,
+          order: "asc" as const,
+          page: 1,
+          limit: 50,
+        };
 
     const service = new PromptsService(context.locals.supabase);
     const result = await service.listPrompts(user.id, query);
@@ -1040,13 +1016,16 @@ export async function GET(context: APIContext) {
 
 export async function POST(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const body = await context.request.json();
@@ -1054,14 +1033,18 @@ export async function POST(context: APIContext) {
 
     if (!validation.success) {
       const firstError = validation.error.errors[0];
-      const code = firstError.path[0] === "title" ? "missing_title" :
-                   firstError.path[0] === "body" ?
-                     (firstError.message.includes("4,000") ? "body_too_long" : "missing_body") :
-                   "invalid_data";
-      return new Response(
-        JSON.stringify({ error: { code, message: firstError.message } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      const code =
+        firstError.path[0] === "title"
+          ? "missing_title"
+          : firstError.path[0] === "body"
+            ? firstError.message.includes("4,000")
+              ? "body_too_long"
+              : "missing_body"
+            : "invalid_data";
+      return new Response(JSON.stringify({ error: { code, message: firstError.message } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptsService(context.locals.supabase);
@@ -1073,10 +1056,10 @@ export async function POST(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof SectionNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "section_not_found", message: "SECTION NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "section_not_found", message: "SECTION NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Create prompt error:", error);
@@ -1099,21 +1082,24 @@ export const prerender = false;
 
 export async function GET(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const paramValidation = uuidParamSchema.safeParse({ id: context.params.id });
     if (!paramValidation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptsService(context.locals.supabase);
@@ -1125,10 +1111,10 @@ export async function GET(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof PromptNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Get prompt error:", error);
@@ -1141,21 +1127,24 @@ export async function GET(context: APIContext) {
 
 export async function PATCH(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const paramValidation = uuidParamSchema.safeParse({ id: context.params.id });
     if (!paramValidation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const body = await context.request.json();
@@ -1164,10 +1153,10 @@ export async function PATCH(context: APIContext) {
     if (!validation.success) {
       const firstError = validation.error.errors[0];
       const code = firstError.message.includes("4,000") ? "body_too_long" : "invalid_data";
-      return new Response(
-        JSON.stringify({ error: { code, message: firstError.message } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code, message: firstError.message } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptsService(context.locals.supabase);
@@ -1179,10 +1168,10 @@ export async function PATCH(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof PromptNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Update prompt error:", error);
@@ -1195,21 +1184,24 @@ export async function PATCH(context: APIContext) {
 
 export async function DELETE(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const paramValidation = uuidParamSchema.safeParse({ id: context.params.id });
     if (!paramValidation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptsService(context.locals.supabase);
@@ -1221,10 +1213,10 @@ export async function DELETE(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof PromptNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "PROMPT NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Delete prompt error:", error);
@@ -1251,13 +1243,16 @@ export const prerender = false;
 
 export async function POST(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const formData = await context.request.formData();
@@ -1266,10 +1261,10 @@ export async function POST(context: APIContext) {
     const sectionId = formData.get("section_id") as string | null;
 
     if (!file) {
-      return new Response(
-        JSON.stringify({ error: { code: "invalid_format", message: "FILE REQUIRED" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "invalid_format", message: "FILE REQUIRED" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptsService(context.locals.supabase);
@@ -1284,16 +1279,16 @@ export async function POST(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof InvalidFileFormatError) {
-      return new Response(
-        JSON.stringify({ error: { code: "invalid_format", message: "ONLY .MD FILES ALLOWED" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "invalid_format", message: "ONLY .MD FILES ALLOWED" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
     if (error instanceof FileTooLargeError) {
-      return new Response(
-        JSON.stringify({ error: { code: "file_too_large", message: "FILE TOO BIG. MAX 10KB" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "file_too_large", message: "FILE TOO BIG. MAX 10KB" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
     if (error instanceof ContentTooLongError) {
       return new Response(
@@ -1322,23 +1317,26 @@ export const prerender = false;
 
 export async function PATCH(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const body = await context.request.json();
     const validation = promptsReorderSchema.safeParse(body);
 
     if (!validation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "invalid_order", message: "INVALID ORDER DATA" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "invalid_order", message: "INVALID ORDER DATA" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptsService(context.locals.supabase);
@@ -1350,10 +1348,10 @@ export async function PATCH(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof PromptNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "prompt_not_found", message: error.message } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "prompt_not_found", message: error.message } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Reorder prompts error:", error);

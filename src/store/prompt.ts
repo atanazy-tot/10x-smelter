@@ -238,4 +238,45 @@ export const usePromptStore = create<PromptState>((set, get) => ({
       customPrompts: state.customPrompts.map((p) => (p.section_id === id ? { ...p, section_id: null } : p)),
     }));
   },
+
+  // Drag and drop
+  movePromptToSection: async (promptId: string, sectionId: string | null) => {
+    const prompt = get().customPrompts.find((p) => p.id === promptId);
+    if (!prompt || prompt.section_id === sectionId) {
+      return; // No change needed
+    }
+
+    // Optimistic update
+    set((state) => ({
+      customPrompts: state.customPrompts.map((p) => (p.id === promptId ? { ...p, section_id: sectionId } : p)),
+    }));
+
+    try {
+      const response = await apiFetch(`/api/prompts/${promptId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ section_id: sectionId }),
+      });
+
+      if (!response.ok) {
+        // Revert on failure
+        set((state) => ({
+          customPrompts: state.customPrompts.map((p) =>
+            p.id === promptId ? { ...p, section_id: prompt.section_id } : p
+          ),
+        }));
+        throw new Error("Failed to move prompt");
+      }
+
+      // Reload sections to update counts
+      get().loadSections();
+    } catch {
+      // Revert on failure
+      set((state) => ({
+        customPrompts: state.customPrompts.map((p) =>
+          p.id === promptId ? { ...p, section_id: prompt.section_id } : p
+        ),
+      }));
+    }
+  },
 }));

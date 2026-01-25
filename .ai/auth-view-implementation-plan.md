@@ -262,8 +262,14 @@ function useAuthForm(): UseAuthFormReturn {
     isLoading,
     error,
     setMode,
-    setEmail: (v) => { setEmail(v); setError(null); },
-    setPassword: (v) => { setPassword(v); setError(null); },
+    setEmail: (v) => {
+      setEmail(v);
+      setError(null);
+    },
+    setPassword: (v) => {
+      setPassword(v);
+      setError(null);
+    },
     submit,
     clearError: () => setError(null),
     reset,
@@ -274,6 +280,7 @@ function useAuthForm(): UseAuthFormReturn {
 ### 6.2 Integration with Auth Store
 
 After successful authentication, the hook should:
+
 1. Call `useAuthStore.getState().setUser(response.user)`
 2. Call `useAuthStore.getState().refreshUsage()`
 3. Redirect to `/` using `window.location.href = "/"`
@@ -285,6 +292,7 @@ After successful authentication, the hook should:
 **Endpoint**: `POST /api/auth/register`
 
 **Request**:
+
 ```typescript
 // Type: AuthCredentialsCommand
 {
@@ -294,15 +302,19 @@ After successful authentication, the hook should:
 ```
 
 **Success Response** (201 Created):
+
 ```typescript
 // Type: AuthResponseDTO
 {
-  user: { id: string; email: string; };
+  user: {
+    id: string;
+    email: string;
+  }
   session: {
     access_token: string;
     refresh_token: string;
     expires_at: number;
-  };
+  }
 }
 ```
 
@@ -319,6 +331,7 @@ After successful authentication, the hook should:
 **Endpoint**: `POST /api/auth/login`
 
 **Request**:
+
 ```typescript
 // Type: AuthCredentialsCommand
 {
@@ -328,15 +341,19 @@ After successful authentication, the hook should:
 ```
 
 **Success Response** (200 OK):
+
 ```typescript
 // Type: AuthResponseDTO
 {
-  user: { id: string; email: string; };
+  user: {
+    id: string;
+    email: string;
+  }
   session: {
     access_token: string;
     refresh_token: string;
     expires_at: number;
-  };
+  }
 }
 ```
 
@@ -352,6 +369,7 @@ After successful authentication, the hook should:
 **Endpoint**: `GET /api/auth/session`
 
 **Success Response** (200 OK):
+
 ```typescript
 // Type: SessionDTO (union)
 // If authenticated:
@@ -392,81 +410,81 @@ async function submitAuth(mode: AuthMode, email: string, password: string): Prom
 
 ### 8.1 Mode Toggle
 
-| Action | Result |
-|--------|--------|
-| Click LOGIN button | Mode switches to 'login', error cleared, password validation relaxed |
+| Action                | Result                                                                 |
+| --------------------- | ---------------------------------------------------------------------- |
+| Click LOGIN button    | Mode switches to 'login', error cleared, password validation relaxed   |
 | Click REGISTER button | Mode switches to 'register', error cleared, password requires 8+ chars |
-| Toggle while loading | Disabled, no action |
+| Toggle while loading  | Disabled, no action                                                    |
 
 ### 8.2 Form Input
 
-| Action | Result |
-|--------|--------|
-| Type in email field | Update email state, clear any existing error |
+| Action                 | Result                                          |
+| ---------------------- | ----------------------------------------------- |
+| Type in email field    | Update email state, clear any existing error    |
 | Type in password field | Update password state, clear any existing error |
-| Tab between fields | Standard tab navigation |
-| Clear field | Update state to empty string |
+| Tab between fields     | Standard tab navigation                         |
+| Clear field            | Update state to empty string                    |
 
 ### 8.3 Form Submission
 
-| Action | Result |
-|--------|--------|
-| Click submit button | Validate inputs, submit if valid, show error if invalid |
-| Press Enter in any input | Submit form (same as button click) |
-| Submit with empty email | Show "EMAIL REQUIRED" error |
-| Submit with invalid email | Show "INVALID EMAIL FORMAT" error |
-| Submit with empty password | Show "PASSWORD REQUIRED" error |
-| Submit with short password (register) | Show "PASSWORD TOO WEAK. MIN 8 CHARS" error |
-| Successful login | Redirect to `/`, update auth store |
-| Successful register | Redirect to `/`, update auth store |
-| Failed auth | Show error message inline |
+| Action                                | Result                                                  |
+| ------------------------------------- | ------------------------------------------------------- |
+| Click submit button                   | Validate inputs, submit if valid, show error if invalid |
+| Press Enter in any input              | Submit form (same as button click)                      |
+| Submit with empty email               | Show "EMAIL REQUIRED" error                             |
+| Submit with invalid email             | Show "INVALID EMAIL FORMAT" error                       |
+| Submit with empty password            | Show "PASSWORD REQUIRED" error                          |
+| Submit with short password (register) | Show "PASSWORD TOO WEAK. MIN 8 CHARS" error             |
+| Successful login                      | Redirect to `/`, update auth store                      |
+| Successful register                   | Redirect to `/`, update auth store                      |
+| Failed auth                           | Show error message inline                               |
 
 ### 8.4 Error Handling
 
-| Action | Result |
-|--------|--------|
-| Error displayed | Coral background, uppercase message |
-| Type in any field | Clear error |
-| Switch mode | Clear error |
+| Action            | Result                              |
+| ----------------- | ----------------------------------- |
+| Error displayed   | Coral background, uppercase message |
+| Type in any field | Clear error                         |
+| Switch mode       | Clear error                         |
 
 ## 9. Conditions and Validation
 
 ### 9.1 Client-Side Validation (Before API Call)
 
-| Field | Condition | Error Code | Error Message | Applied In |
-|-------|-----------|------------|---------------|------------|
-| Email | Required (non-empty) | `missing_email` | EMAIL REQUIRED | Both modes |
-| Email | Valid format (regex) | `invalid_email` | INVALID EMAIL FORMAT | Both modes |
-| Password | Required (non-empty) | `missing_password` | PASSWORD REQUIRED | Both modes |
-| Password | Min 8 characters | `weak_password` | PASSWORD TOO WEAK. MIN 8 CHARS | Register only |
-| Password | Max 72 characters | `password_too_long` | PASSWORD TOO LONG. MAX 72 CHARS | Both modes |
+| Field    | Condition            | Error Code          | Error Message                   | Applied In    |
+| -------- | -------------------- | ------------------- | ------------------------------- | ------------- |
+| Email    | Required (non-empty) | `missing_email`     | EMAIL REQUIRED                  | Both modes    |
+| Email    | Valid format (regex) | `invalid_email`     | INVALID EMAIL FORMAT            | Both modes    |
+| Password | Required (non-empty) | `missing_password`  | PASSWORD REQUIRED               | Both modes    |
+| Password | Min 8 characters     | `weak_password`     | PASSWORD TOO WEAK. MIN 8 CHARS  | Register only |
+| Password | Max 72 characters    | `password_too_long` | PASSWORD TOO LONG. MAX 72 CHARS | Both modes    |
 
 ### 9.2 Server-Side Validation (API Errors)
 
-| Condition | Error Code | Error Message | Mode |
-|-----------|------------|---------------|------|
-| Invalid email format | `invalid_email` | INVALID EMAIL FORMAT | Both |
-| Password too weak | `weak_password` | PASSWORD TOO WEAK. MIN 8 CHARS | Register |
-| Email already registered | `email_exists` | EMAIL ALREADY REGISTERED | Register |
-| Wrong credentials | `invalid_credentials` | WRONG EMAIL OR PASSWORD | Login |
-| Too many attempts | `rate_limited` | TOO MANY ATTEMPTS. TRY AGAIN LATER | Both |
-| Server error | `internal_error` | SOMETHING WENT WRONG. TRY AGAIN | Both |
+| Condition                | Error Code            | Error Message                      | Mode     |
+| ------------------------ | --------------------- | ---------------------------------- | -------- |
+| Invalid email format     | `invalid_email`       | INVALID EMAIL FORMAT               | Both     |
+| Password too weak        | `weak_password`       | PASSWORD TOO WEAK. MIN 8 CHARS     | Register |
+| Email already registered | `email_exists`        | EMAIL ALREADY REGISTERED           | Register |
+| Wrong credentials        | `invalid_credentials` | WRONG EMAIL OR PASSWORD            | Login    |
+| Too many attempts        | `rate_limited`        | TOO MANY ATTEMPTS. TRY AGAIN LATER | Both     |
+| Server error             | `internal_error`      | SOMETHING WENT WRONG. TRY AGAIN    | Both     |
 
 ### 9.3 Form State Validation
 
-| State | Submit Button |
-|-------|---------------|
-| Email empty | Disabled |
-| Password empty | Disabled |
+| State          | Submit Button                 |
+| -------------- | ----------------------------- |
+| Email empty    | Disabled                      |
+| Password empty | Disabled                      |
 | isLoading true | Disabled, shows loading state |
-| All valid | Enabled |
+| All valid      | Enabled                       |
 
 ### 9.4 Session Check
 
-| Condition | Action |
-|-----------|--------|
+| Condition                          | Action          |
+| ---------------------------------- | --------------- |
 | Already authenticated on page load | Redirect to `/` |
-| Not authenticated | Show auth form |
+| Not authenticated                  | Show auth form  |
 
 ## 10. Error Handling
 
@@ -479,7 +497,7 @@ try {
   if (error instanceof TypeError && error.message === "Failed to fetch") {
     setError({
       code: "network_error",
-      message: "CONNECTION FAILED. CHECK YOUR INTERNET"
+      message: "CONNECTION FAILED. CHECK YOUR INTERNET",
     });
   }
 }
@@ -494,7 +512,7 @@ if (!response.ok) {
   const errorData: ApiErrorResponse = await response.json();
   setError({
     code: errorData.code,
-    message: errorData.message
+    message: errorData.message,
   });
 }
 ```
@@ -532,12 +550,12 @@ function validateForm(mode: AuthMode, email: string, password: string): AuthForm
 
 ### 10.4 Edge Cases
 
-| Scenario | Handling |
-|----------|----------|
-| Double form submission | Disable button while loading |
-| Session check fails | Allow form display, proceed with auth |
-| Redirect after auth fails | Show error, stay on page |
-| Token storage fails | Handled by Supabase client internally |
+| Scenario                  | Handling                              |
+| ------------------------- | ------------------------------------- |
+| Double form submission    | Disable button while loading          |
+| Session check fails       | Allow form display, proceed with auth |
+| Redirect after auth fails | Show error, stay on page              |
+| Token storage fails       | Handled by Supabase client internally |
 
 ## 11. Implementation Steps
 

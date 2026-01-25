@@ -4,13 +4,13 @@
 
 Prompt Sections provide organizational grouping for user-created custom prompts (similar to tab groups in browsers). Users can create, update, delete, and reorder sections.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/prompt-sections` | GET | List all sections |
-| `/api/prompt-sections` | POST | Create new section |
-| `/api/prompt-sections/:id` | PATCH | Update section |
-| `/api/prompt-sections/:id` | DELETE | Delete section |
-| `/api/prompt-sections/reorder` | PATCH | Reorder sections |
+| Endpoint                       | Method | Description        |
+| ------------------------------ | ------ | ------------------ |
+| `/api/prompt-sections`         | GET    | List all sections  |
+| `/api/prompt-sections`         | POST   | Create new section |
+| `/api/prompt-sections/:id`     | PATCH  | Update section     |
+| `/api/prompt-sections/:id`     | DELETE | Delete section     |
+| `/api/prompt-sections/reorder` | PATCH  | Reorder sections   |
 
 ---
 
@@ -36,6 +36,7 @@ Prompt Sections provide organizational grouping for user-created custom prompts 
   - `Authorization: Bearer <access_token>` (required)
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "title": "Meetings",
@@ -53,6 +54,7 @@ Prompt Sections provide organizational grouping for user-created custom prompts 
 - **Path Parameters**:
   - `id` - Section UUID
 - **Request Body**:
+
 ```json
 {
   "title": "Work Meetings",
@@ -77,6 +79,7 @@ Prompt Sections provide organizational grouping for user-created custom prompts 
   - `Authorization: Bearer <access_token>` (required)
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "order": [
@@ -169,21 +172,17 @@ export const listSectionsQuerySchema = z.object({
 
 // Create section
 export const sectionCreateSchema = z.object({
-  title: z
-    .string()
-    .min(1, "SECTION TITLE REQUIRED")
-    .max(100, "SECTION TITLE TOO LONG"),
+  title: z.string().min(1, "SECTION TITLE REQUIRED").max(100, "SECTION TITLE TOO LONG"),
   position: z.number().int().min(0).optional(),
 });
 
 // Update section
-export const sectionUpdateSchema = z.object({
-  title: z.string().min(1).max(100).optional(),
-  position: z.number().int().min(0).optional(),
-}).refine(
-  data => data.title !== undefined || data.position !== undefined,
-  { message: "INVALID UPDATE DATA" }
-);
+export const sectionUpdateSchema = z
+  .object({
+    title: z.string().min(1).max(100).optional(),
+    position: z.number().int().min(0).optional(),
+  })
+  .refine((data) => data.title !== undefined || data.position !== undefined, { message: "INVALID UPDATE DATA" });
 
 // UUID param
 export const uuidParamSchema = z.object({
@@ -214,6 +213,7 @@ export type SectionsReorderInput = z.infer<typeof sectionsReorderSchema>;
 ### GET /api/prompt-sections
 
 **Success (200 OK)**:
+
 ```json
 {
   "sections": [
@@ -245,6 +245,7 @@ export type SectionsReorderInput = z.infer<typeof sectionsReorderSchema>;
 ### POST /api/prompt-sections
 
 **Success (201 Created)**:
+
 ```json
 {
   "id": "uuid",
@@ -264,6 +265,7 @@ export type SectionsReorderInput = z.infer<typeof sectionsReorderSchema>;
 ### PATCH /api/prompt-sections/:id
 
 **Success (200 OK)**:
+
 ```json
 {
   "id": "uuid",
@@ -284,6 +286,7 @@ export type SectionsReorderInput = z.infer<typeof sectionsReorderSchema>;
 ### DELETE /api/prompt-sections/:id
 
 **Success (200 OK)**:
+
 ```json
 {
   "message": "SECTION DELETED",
@@ -300,6 +303,7 @@ export type SectionsReorderInput = z.infer<typeof sectionsReorderSchema>;
 ### PATCH /api/prompt-sections/reorder
 
 **Success (200 OK)**:
+
 ```json
 {
   "message": "SECTIONS REORDERED",
@@ -469,10 +473,7 @@ export const listSectionsQuerySchema = z.object({
 });
 
 export const sectionCreateSchema = z.object({
-  title: z
-    .string()
-    .min(1, "SECTION TITLE REQUIRED")
-    .max(100, "SECTION TITLE TOO LONG"),
+  title: z.string().min(1, "SECTION TITLE REQUIRED").max(100, "SECTION TITLE TOO LONG"),
   position: z.number().int().min(0).optional(),
 });
 
@@ -517,28 +518,32 @@ import type {
   PromptSectionDeleteResponseDTO,
   ReorderResponseDTO,
 } from "@/types";
-import type { ListSectionsQuery, SectionCreateInput, SectionUpdateInput, SectionsReorderInput } from "@/lib/schemas/prompt-sections.schema";
+import type {
+  ListSectionsQuery,
+  SectionCreateInput,
+  SectionUpdateInput,
+  SectionsReorderInput,
+} from "@/lib/schemas/prompt-sections.schema";
 
 export class PromptSectionsService {
   constructor(private supabase: SupabaseClient) {}
 
-  async listSections(
-    userId: string,
-    query: ListSectionsQuery
-  ): Promise<PromptSectionsListDTO> {
+  async listSections(userId: string, query: ListSectionsQuery): Promise<PromptSectionsListDTO> {
     const { sort, order } = query;
 
     // Query sections with prompt count
     const { data, error } = await this.supabase
       .from("prompt_sections")
-      .select(`
+      .select(
+        `
         id,
         title,
         position,
         created_at,
         updated_at,
         prompts(count)
-      `)
+      `
+      )
       .eq("user_id", userId)
       .order(sort, { ascending: order === "asc" });
 
@@ -556,10 +561,7 @@ export class PromptSectionsService {
     return { sections };
   }
 
-  async createSection(
-    userId: string,
-    input: SectionCreateInput
-  ): Promise<PromptSectionDTO> {
+  async createSection(userId: string, input: SectionCreateInput): Promise<PromptSectionDTO> {
     let position = input.position;
 
     // Auto-assign position if not provided
@@ -596,11 +598,7 @@ export class PromptSectionsService {
     };
   }
 
-  async updateSection(
-    userId: string,
-    sectionId: string,
-    input: SectionUpdateInput
-  ): Promise<PromptSectionDTO> {
+  async updateSection(userId: string, sectionId: string, input: SectionUpdateInput): Promise<PromptSectionDTO> {
     // Verify ownership
     const { data: existing, error: fetchError } = await this.supabase
       .from("prompt_sections")
@@ -636,10 +634,7 @@ export class PromptSectionsService {
     };
   }
 
-  async deleteSection(
-    userId: string,
-    sectionId: string
-  ): Promise<PromptSectionDeleteResponseDTO> {
+  async deleteSection(userId: string, sectionId: string): Promise<PromptSectionDeleteResponseDTO> {
     // Verify ownership and get section
     const { data: existing, error: fetchError } = await this.supabase
       .from("prompt_sections")
@@ -659,16 +654,10 @@ export class PromptSectionsService {
       .eq("section_id", sectionId);
 
     // Move prompts to unsectioned (set section_id to null)
-    await this.supabase
-      .from("prompts")
-      .update({ section_id: null })
-      .eq("section_id", sectionId);
+    await this.supabase.from("prompts").update({ section_id: null }).eq("section_id", sectionId);
 
     // Delete section
-    const { error } = await this.supabase
-      .from("prompt_sections")
-      .delete()
-      .eq("id", sectionId);
+    const { error } = await this.supabase.from("prompt_sections").delete().eq("id", sectionId);
 
     if (error) throw error;
 
@@ -678,10 +667,7 @@ export class PromptSectionsService {
     };
   }
 
-  async reorderSections(
-    userId: string,
-    input: SectionsReorderInput
-  ): Promise<ReorderResponseDTO> {
+  async reorderSections(userId: string, input: SectionsReorderInput): Promise<ReorderResponseDTO> {
     const { order } = input;
 
     // Verify all sections exist and belong to user
@@ -732,22 +718,22 @@ export class SectionNotFoundError extends Error {
 ```typescript
 import type { APIContext } from "astro";
 import { PromptSectionsService, SectionNotFoundError } from "@/lib/services/prompt-sections.service";
-import {
-  listSectionsQuerySchema,
-  sectionCreateSchema,
-} from "@/lib/schemas/prompt-sections.schema";
+import { listSectionsQuerySchema, sectionCreateSchema } from "@/lib/schemas/prompt-sections.schema";
 
 export const prerender = false;
 
 export async function GET(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const url = new URL(context.request.url);
@@ -777,13 +763,16 @@ export async function GET(context: APIContext) {
 
 export async function POST(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const body = await context.request.json();
@@ -791,10 +780,10 @@ export async function POST(context: APIContext) {
 
     if (!validation.success) {
       const errorMessage = validation.error.errors[0]?.message ?? "SECTION TITLE REQUIRED";
-      return new Response(
-        JSON.stringify({ error: { code: "missing_title", message: errorMessage } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "missing_title", message: errorMessage } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptSectionsService(context.locals.supabase);
@@ -825,31 +814,34 @@ export const prerender = false;
 
 export async function PATCH(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const paramValidation = uuidParamSchema.safeParse({ id: context.params.id });
     if (!paramValidation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const body = await context.request.json();
     const validation = sectionUpdateSchema.safeParse(body);
 
     if (!validation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "invalid_data", message: "INVALID UPDATE DATA" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "invalid_data", message: "INVALID UPDATE DATA" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptSectionsService(context.locals.supabase);
@@ -861,10 +853,10 @@ export async function PATCH(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof SectionNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Update section error:", error);
@@ -877,21 +869,24 @@ export async function PATCH(context: APIContext) {
 
 export async function DELETE(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const paramValidation = uuidParamSchema.safeParse({ id: context.params.id });
     if (!paramValidation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptSectionsService(context.locals.supabase);
@@ -903,10 +898,10 @@ export async function DELETE(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof SectionNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "not_found", message: "SECTION NOT FOUND" } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Delete section error:", error);
@@ -929,23 +924,26 @@ export const prerender = false;
 
 export async function PATCH(context: APIContext) {
   try {
-    const { data: { user }, error: authError } = await context.locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await context.locals.supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "unauthorized", message: "LOGIN REQUIRED" } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const body = await context.request.json();
     const validation = sectionsReorderSchema.safeParse(body);
 
     if (!validation.success) {
-      return new Response(
-        JSON.stringify({ error: { code: "invalid_order", message: "INVALID ORDER DATA" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "invalid_order", message: "INVALID ORDER DATA" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const service = new PromptSectionsService(context.locals.supabase);
@@ -957,10 +955,10 @@ export async function PATCH(context: APIContext) {
     });
   } catch (error) {
     if (error instanceof SectionNotFoundError) {
-      return new Response(
-        JSON.stringify({ error: { code: "section_not_found", message: error.message } }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: { code: "section_not_found", message: error.message } }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     console.error("Reorder sections error:", error);
