@@ -38,8 +38,8 @@ Provide your notes in the following markdown format:
 
 ## Key Definitions/Terms
 
-| Term | Definition |
-|------|------------|
+| Term     | Definition         |
+| -------- | ------------------ |
 | [Term 1] | [Clear definition] |
 | [Term 2] | [Clear definition] |
 

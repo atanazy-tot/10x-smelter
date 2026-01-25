@@ -1,6 +1,6 @@
 /**
  * Main React island for the processing page.
- * Orchestrates all input, controls, output, and sidebar components.
+ * Orchestrates all input, controls, output, and API key components.
  */
 
 import { useEffect } from "react";
@@ -10,7 +10,8 @@ import { Header } from "@/components/layout/Header";
 import { InputSection } from "./InputSection";
 import { ControlsSection } from "./ControlsSection";
 import { OutputSection } from "./OutputSection";
-import { PromptSidebar } from "@/components/prompts/PromptSidebar";
+import { ApiKeyCollapsible } from "./ApiKeyCollapsible";
+import { PromptEditor } from "@/components/prompts/PromptEditor";
 
 export function MainProcessingIsland() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -70,6 +71,9 @@ export function MainProcessingIsland() {
                 </button>
               </div>
             )}
+
+            {/* API Key Section (authenticated users only) */}
+            <ApiKeyCollapsible />
           </div>
         )}
       </main>
@@ -87,8 +91,8 @@ export function MainProcessingIsland() {
         </div>
       </footer>
 
-      {/* Prompt Sidebar (logged-in only) */}
-      <PromptSidebar />
+      {/* Prompt editor modal (used by CustomPromptsSection) */}
+      <PromptEditor />
     </div>
   );
 }

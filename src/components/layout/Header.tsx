@@ -1,10 +1,10 @@
 /**
- * App header with branding, user status, and navigation.
+ * App header with branding, user status, and logout.
  */
 
-import { Settings, LogOut, User, Library } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuthStore, useUIStore } from "@/store";
+import { useAuthStore } from "@/store";
 import { CreditDisplay } from "./CreditDisplay";
 
 interface HeaderProps {
@@ -15,7 +15,6 @@ export function Header({ className }: HeaderProps) {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
-  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
 
   return (
     <header className={cn("flex items-center justify-between p-4 border-b-2 border-border bg-background", className)}>
@@ -32,27 +31,6 @@ export function Header({ className }: HeaderProps) {
 
         {isAuthenticated ? (
           <>
-            {/* Prompts toggle (for custom prompts sidebar) */}
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              className="p-2 border-2 border-border bg-background text-foreground hover:bg-foreground hover:text-background transition-colors"
-              aria-label="Toggle prompts sidebar"
-              title="Custom Prompts"
-            >
-              <Library className="w-5 h-5" />
-            </button>
-
-            {/* Settings */}
-            <a
-              href="/settings"
-              className="p-2 border-2 border-border bg-background text-foreground hover:bg-foreground hover:text-background transition-colors"
-              aria-label="Settings"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </a>
-
             {/* User menu / Logout */}
             <div className="flex items-center gap-2">
               <span className="hidden sm:block font-mono text-xs text-foreground/60 uppercase truncate max-w-[120px]">

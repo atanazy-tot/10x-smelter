@@ -24,19 +24,22 @@ Provide your output in the following markdown format:
 ## Contents
 
 ### 1. [First Major Section Title]
-*[Brief 1-2 sentence description of what this section covers]*
 
-  - 1.1 [Subsection] — [Very brief description]
-  - 1.2 [Subsection] — [Very brief description]
+_[Brief 1-2 sentence description of what this section covers]_
+
+- 1.1 [Subsection] — [Very brief description]
+- 1.2 [Subsection] — [Very brief description]
 
 ### 2. [Second Major Section Title]
-*[Brief description]*
 
-  - 2.1 [Subsection] — [Description]
-  - 2.2 [Subsection] — [Description]
+_[Brief description]_
+
+- 2.1 [Subsection] — [Description]
+- 2.2 [Subsection] — [Description]
 
 ### 3. [Third Major Section Title]
-*[Brief description]*
+
+_[Brief description]_
 
 [Continue as needed...]
 
@@ -44,11 +47,11 @@ Provide your output in the following markdown format:
 
 ## Quick Reference
 
-| Section | Topic | Key Points |
-|---------|-------|------------|
-| 1 | [Topic] | [1-3 key points] |
-| 2 | [Topic] | [1-3 key points] |
-| 3 | [Topic] | [1-3 key points] |
+| Section | Topic   | Key Points       |
+| ------- | ------- | ---------------- |
+| 1       | [Topic] | [1-3 key points] |
+| 2       | [Topic] | [1-3 key points] |
+| 3       | [Topic] | [1-3 key points] |
 
 ## Topics Covered
 

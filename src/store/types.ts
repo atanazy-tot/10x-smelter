@@ -155,10 +155,7 @@ export interface ProcessingState {
 }
 
 export interface UIState {
-  sidebarOpen: boolean;
   mobilePromptOverlayOpen: boolean;
-  toggleSidebar: () => void;
-  setSidebarOpen: (open: boolean) => void;
   toggleMobilePromptOverlay: () => void;
   setMobilePromptOverlayOpen: (open: boolean) => void;
 }

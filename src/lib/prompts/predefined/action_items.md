@@ -15,12 +15,12 @@ Provide your output in the following markdown format:
 
 ## High Priority
 
-- [ ] [Action item description] — *[Owner if known]* — *[Deadline if mentioned]*
+- [ ] [Action item description] — _[Owner if known]_ — _[Deadline if mentioned]_
 - [ ] [Action item description]
 
 ## Standard Priority
 
-- [ ] [Action item description] — *[Owner if known]*
+- [ ] [Action item description] — _[Owner if known]_
 - [ ] [Action item description]
 
 ## Follow-ups

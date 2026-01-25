@@ -1,11 +1,11 @@
 /**
- * Expandable section in the prompt sidebar.
+ * Expandable section for prompt sections.
+ * Uses neobrutalist Accordion components.
  */
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePromptStore } from "@/store";
+import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { PromptItem } from "./PromptItem";
 import type { PromptSectionWithCountDTO } from "@/types";
 
@@ -15,40 +15,28 @@ interface SectionAccordionProps {
 }
 
 export function SectionAccordion({ section, className }: SectionAccordionProps) {
-  const [isOpen, setIsOpen] = useState(true);
   const customPrompts = usePromptStore((state) => state.customPrompts);
-
   const sectionPrompts = customPrompts.filter((p) => p.section_id === section.id);
 
   return (
-    <div className={cn("flex flex-col", className)}>
-      {/* Section header */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between p-3 bg-foreground text-background font-mono text-sm uppercase tracking-wider hover:bg-foreground/90 transition-colors"
-      >
+    <AccordionItem value={section.id} className={cn(className)}>
+      <AccordionTrigger className="font-mono text-sm uppercase">
         <span className="flex items-center gap-2">
-          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           {section.title}
+          <span className="text-xs opacity-60">({section.prompt_count})</span>
         </span>
-        <span className="text-background/60">{section.prompt_count}</span>
-      </button>
-
-      {/* Prompts list */}
-      {isOpen && sectionPrompts.length > 0 && (
-        <div className="flex flex-col gap-1 p-2 bg-background/50">
-          {sectionPrompts.map((prompt) => (
-            <PromptItem key={prompt.id} prompt={prompt} />
-          ))}
-        </div>
-      )}
-
-      {isOpen && sectionPrompts.length === 0 && (
-        <div className="p-4 bg-background/50">
-          <p className="font-mono text-xs text-foreground/40 uppercase text-center">NO PROMPTS YET</p>
-        </div>
-      )}
-    </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        {sectionPrompts.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {sectionPrompts.map((prompt) => (
+              <PromptItem key={prompt.id} prompt={prompt} />
+            ))}
+          </div>
+        ) : (
+          <p className="font-mono text-xs text-foreground/40 uppercase text-center py-2">NO PROMPTS IN THIS SECTION</p>
+        )}
+      </AccordionContent>
+    </AccordionItem>
   );
 }

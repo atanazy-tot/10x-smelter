@@ -1,1 +1,0 @@
-export { SettingsIsland } from "./SettingsIsland";
