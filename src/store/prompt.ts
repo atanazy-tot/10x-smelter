@@ -4,7 +4,13 @@
 
 import { create } from "zustand";
 import type { PromptState } from "./types";
-import type { DefaultPromptName, PromptDTO, PromptsListDTO, PromptSectionsListDTO } from "@/types";
+import type {
+  DefaultPromptName,
+  PromptDTO,
+  PromptsListDTO,
+  PromptSectionsListDTO,
+  PromptSectionWithCountDTO,
+} from "@/types";
 import { apiFetch } from "@/lib/utils/api-client";
 
 export const usePromptStore = create<PromptState>((set, get) => ({
@@ -15,6 +21,8 @@ export const usePromptStore = create<PromptState>((set, get) => ({
   isLoading: false,
   editorOpen: false,
   editingPrompt: null,
+  sectionDialogOpen: false,
+  editingSection: null,
 
   togglePredefinedPrompt: (name: DefaultPromptName) => {
     set((state) => {
@@ -104,11 +112,16 @@ export const usePromptStore = create<PromptState>((set, get) => ({
     return prompt;
   },
 
-  updatePrompt: async (id: string, title: string, body: string) => {
+  updatePrompt: async (id: string, title: string, body: string, sectionId?: string | null) => {
+    const payload: { title: string; body: string; section_id?: string | null } = { title, body };
+    if (sectionId !== undefined) {
+      payload.section_id = sectionId;
+    }
+
     const response = await apiFetch(`/api/prompts/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -122,6 +135,9 @@ export const usePromptStore = create<PromptState>((set, get) => ({
       editorOpen: false,
       editingPrompt: null,
     }));
+
+    // Reload sections to update counts
+    get().loadSections();
 
     return prompt;
   },
@@ -148,5 +164,78 @@ export const usePromptStore = create<PromptState>((set, get) => ({
   hasSelection: (): boolean => {
     const state = get();
     return state.selectedPredefinedPrompts.length > 0 || state.selectedCustomPromptId !== null;
+  },
+
+  // Section dialog management
+  setSectionDialogOpen: (open: boolean) => {
+    set({ sectionDialogOpen: open });
+    if (!open) {
+      set({ editingSection: null });
+    }
+  },
+
+  setEditingSection: (section: PromptSectionWithCountDTO | null) => {
+    set({ editingSection: section, sectionDialogOpen: section !== null });
+  },
+
+  createSection: async (title: string) => {
+    const response = await apiFetch("/api/prompt-sections", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to create section");
+    }
+
+    const section: PromptSectionWithCountDTO = await response.json();
+    set((state) => ({
+      sections: [...state.sections, { ...section, prompt_count: 0 }],
+      sectionDialogOpen: false,
+      editingSection: null,
+    }));
+
+    return section;
+  },
+
+  updateSection: async (id: string, title: string) => {
+    const response = await apiFetch(`/api/prompt-sections/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to update section");
+    }
+
+    const section: PromptSectionWithCountDTO = await response.json();
+    set((state) => ({
+      sections: state.sections.map((s) => (s.id === id ? { ...section, prompt_count: s.prompt_count } : s)),
+      sectionDialogOpen: false,
+      editingSection: null,
+    }));
+
+    return section;
+  },
+
+  deleteSection: async (id: string) => {
+    const response = await apiFetch(`/api/prompt-sections/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete section");
+    }
+
+    // Move prompts from deleted section to unsorted
+    set((state) => ({
+      sections: state.sections.filter((s) => s.id !== id),
+      customPrompts: state.customPrompts.map((p) => (p.section_id === id ? { ...p, section_id: null } : p)),
+    }));
   },
 }));

@@ -127,6 +127,9 @@ export interface PromptState {
   isLoading: boolean;
   editorOpen: boolean;
   editingPrompt: PromptDTO | null;
+  // Section dialog state
+  sectionDialogOpen: boolean;
+  editingSection: PromptSectionWithCountDTO | null;
   togglePredefinedPrompt: (name: DefaultPromptName) => void;
   selectCustomPrompt: (id: string | null) => void;
   loadPrompts: () => Promise<void>;
@@ -134,9 +137,15 @@ export interface PromptState {
   setEditorOpen: (open: boolean) => void;
   setEditingPrompt: (prompt: PromptDTO | null) => void;
   createPrompt: (title: string, body: string, sectionId?: string) => Promise<PromptDTO>;
-  updatePrompt: (id: string, title: string, body: string) => Promise<PromptDTO>;
+  updatePrompt: (id: string, title: string, body: string, sectionId?: string | null) => Promise<PromptDTO>;
   deletePrompt: (id: string) => Promise<void>;
   hasSelection: () => boolean;
+  // Section management
+  setSectionDialogOpen: (open: boolean) => void;
+  setEditingSection: (section: PromptSectionWithCountDTO | null) => void;
+  createSection: (title: string) => Promise<PromptSectionWithCountDTO>;
+  updateSection: (id: string, title: string) => Promise<PromptSectionWithCountDTO>;
+  deleteSection: (id: string) => Promise<void>;
 }
 
 export interface ProcessingState {

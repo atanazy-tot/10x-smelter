@@ -14,12 +14,14 @@ interface PromptEditorProps {
 export function PromptEditor({ className }: PromptEditorProps) {
   const editorOpen = usePromptStore((state) => state.editorOpen);
   const editingPrompt = usePromptStore((state) => state.editingPrompt);
+  const sections = usePromptStore((state) => state.sections);
   const setEditorOpen = usePromptStore((state) => state.setEditorOpen);
   const createPrompt = usePromptStore((state) => state.createPrompt);
   const updatePrompt = usePromptStore((state) => state.updatePrompt);
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [sectionId, setSectionId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,9 +32,11 @@ export function PromptEditor({ className }: PromptEditorProps) {
     if (editingPrompt) {
       setTitle(editingPrompt.title);
       setBody(editingPrompt.body);
+      setSectionId(editingPrompt.section_id);
     } else {
       setTitle("");
       setBody("");
+      setSectionId(null);
     }
     setError(null);
   }, [editingPrompt, editorOpen]);
@@ -54,9 +58,9 @@ export function PromptEditor({ className }: PromptEditorProps) {
 
     try {
       if (isEditing && editingPrompt) {
-        await updatePrompt(editingPrompt.id, title.trim(), body.trim());
+        await updatePrompt(editingPrompt.id, title.trim(), body.trim(), sectionId);
       } else {
-        await createPrompt(title.trim(), body.trim());
+        await createPrompt(title.trim(), body.trim(), sectionId ?? undefined);
       }
       handleClose();
     } catch (err) {
@@ -122,6 +126,25 @@ export function PromptEditor({ className }: PromptEditorProps) {
               className="w-full p-3 font-mono text-sm border-2 border-border bg-background text-foreground placeholder:text-foreground/40 placeholder:uppercase focus:outline-none"
               maxLength={100}
             />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="prompt-section" className="font-mono text-xs uppercase text-foreground/60">
+              SECTION
+            </label>
+            <select
+              id="prompt-section"
+              value={sectionId ?? ""}
+              onChange={(e) => setSectionId(e.target.value || null)}
+              className="w-full p-3 font-mono text-sm border-2 border-border bg-background text-foreground focus:outline-none uppercase"
+            >
+              <option value="">UNSORTED</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.title}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-2">
