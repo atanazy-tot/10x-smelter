@@ -25,3 +25,12 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# IDE and editor settings
+.vscode/
+.cursor/
+.windsurfrules
+
+# Claude Code configuration
+.claude/
+CLAUDE.md
