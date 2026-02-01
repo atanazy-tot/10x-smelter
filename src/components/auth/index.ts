@@ -3,4 +3,8 @@ export { AuthContainer } from "./AuthContainer";
 export { AuthForm } from "./AuthForm";
 export { AuthModeToggle } from "./AuthModeToggle";
 export { ErrorMessage } from "./ErrorMessage";
+export { SuccessMessage } from "./SuccessMessage";
+export { VerifyEmailIsland } from "./VerifyEmailIsland";
+export { ResetPasswordIsland } from "./ResetPasswordIsland";
+export { UpdatePasswordIsland } from "./UpdatePasswordIsland";
 export type { AuthMode, AuthFormError, AuthFormState } from "./types";

@@ -1,0 +1,9 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { VerifyEmailIsland } from "../../components/auth/VerifyEmailIsland";
+export const prerender = false;
+---
+
+<Layout title="SMELT - Verify Your Email">
+  <VerifyEmailIsland client:load />
+</Layout>

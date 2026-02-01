@@ -24,6 +24,7 @@
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/vite": "^4.1.13",
     "@types/react": "^19.1.12",

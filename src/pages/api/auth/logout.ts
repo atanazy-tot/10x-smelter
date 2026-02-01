@@ -6,16 +6,14 @@ export const prerender = false;
 
 export async function POST(context: APIContext) {
   try {
-    const {
-      data: { user },
-    } = context.locals.accessToken
-      ? await context.locals.supabase.auth.getUser(context.locals.accessToken)
-      : await context.locals.supabase.auth.getUser();
-
-    if (!user) throw new UnauthorizedError("NOT LOGGED IN");
+    // Check if user is authenticated using the new middleware locals
+    if (!context.locals.isAuthenticated || !context.locals.user) {
+      throw new UnauthorizedError("NOT LOGGED IN");
+    }
 
     await logout(context.locals.supabase);
 
+    // Session cookies are automatically cleared by Supabase SSR
     return jsonResponse({ message: "LOGGED OUT" });
   } catch (error) {
     return toAppError(error).toResponse();

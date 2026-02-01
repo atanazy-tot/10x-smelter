@@ -1,5 +1,5 @@
 import type { APIContext } from "astro";
-import { authCredentialsSchema } from "@/lib/schemas/auth.schema";
+import { registerSchema } from "@/lib/schemas/auth.schema";
 import { register } from "@/lib/services/auth.service";
 import { ValidationError, jsonResponse, toAppError } from "@/lib/utils/auth-errors";
 
@@ -8,7 +8,7 @@ export const prerender = false;
 export async function POST(context: APIContext) {
   try {
     const body = await context.request.json();
-    const validation = authCredentialsSchema.safeParse(body);
+    const validation = registerSchema.safeParse(body);
 
     if (!validation.success) {
       const firstError = validation.error.errors[0];
@@ -16,7 +16,16 @@ export async function POST(context: APIContext) {
       throw new ValidationError(code, firstError.message);
     }
 
-    const result = await register(context.locals.supabase, validation.data.email, validation.data.password);
+    // Build redirect URL for email verification
+    const origin = new URL(context.request.url).origin;
+    const emailRedirectTo = `${origin}/api/auth/callback`;
+
+    const result = await register(
+      context.locals.supabase,
+      validation.data.email,
+      validation.data.password,
+      emailRedirectTo
+    );
 
     return jsonResponse(result, 201);
   } catch (error) {

@@ -1,12 +1,11 @@
 /**
  * Authentication store for user session and usage tracking.
+ * Uses cookie-based authentication via Supabase SSR.
  */
 
 import { create } from "zustand";
 import type { AuthState } from "./types";
 import type { UsageDTO, SessionDTO } from "@/types";
-import { apiFetch } from "@/lib/utils/api-client";
-import { clearTokens } from "@/lib/utils/token-storage";
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -26,11 +25,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await apiFetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin",
+      });
     } catch {
       // Ignore logout errors
     }
-    clearTokens();
     set({
       user: null,
       isAuthenticated: false,
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshUsage: async () => {
     try {
-      const response = await apiFetch("/api/usage");
+      const response = await fetch("/api/usage", { credentials: "same-origin" });
       if (response.ok) {
         const usage: UsageDTO = await response.json();
         set({ usage });
@@ -55,8 +56,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     set({ isLoading: true });
     try {
-      // Fetch session and usage in parallel
-      const [sessionRes, usageRes] = await Promise.all([apiFetch("/api/auth/session"), apiFetch("/api/usage")]);
+      // Fetch session and usage in parallel using cookie-based auth
+      const [sessionRes, usageRes] = await Promise.all([
+        fetch("/api/auth/session", { credentials: "same-origin" }),
+        fetch("/api/usage", { credentials: "same-origin" }),
+      ]);
 
       if (sessionRes.ok) {
         const session: SessionDTO = await sessionRes.json();
@@ -66,8 +70,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             isAuthenticated: true,
           });
         } else {
-          // Not authenticated - clear any stale tokens
-          clearTokens();
           set({
             user: null,
             isAuthenticated: false,

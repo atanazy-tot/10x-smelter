@@ -11,7 +11,8 @@ export async function GET(context: APIContext) {
       context.request.headers.get("x-real-ip") ??
       "unknown";
 
-    const session = await getSession(context.locals.supabase, clientIp, context.locals.accessToken);
+    // Pass the user from middleware locals (already validated from cookies)
+    const session = await getSession(context.locals.supabase, clientIp, context.locals.user);
 
     return jsonResponse(session);
   } catch (error) {

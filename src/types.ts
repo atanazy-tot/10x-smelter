@@ -78,10 +78,12 @@ export interface AuthCredentialsCommand {
 export interface AuthUserDTO {
   id: string;
   email: string;
+  email_verified?: boolean;
 }
 
 /**
  * Session token information returned after authentication
+ * @deprecated Tokens are now managed via HTTP-only cookies
  */
 export interface AuthSessionDTO {
   access_token: string;
@@ -90,12 +92,56 @@ export interface AuthSessionDTO {
 }
 
 /**
- * Combined response for successful authentication
- * POST /api/auth/register, POST /api/auth/login response
+ * @deprecated Use RegisterResponseDTO or LoginResponseDTO instead
+ * Combined response for successful authentication (legacy)
  */
 export interface AuthResponseDTO {
   user: AuthUserDTO;
   session: AuthSessionDTO;
+}
+
+/**
+ * Response after successful registration
+ * POST /api/auth/register response
+ * Note: No tokens returned - session managed via cookies
+ */
+export interface RegisterResponseDTO {
+  user: { id: string; email: string };
+  message: string;
+}
+
+/**
+ * Response after successful login
+ * POST /api/auth/login response
+ * Note: No tokens returned - session managed via cookies
+ */
+export interface LoginResponseDTO {
+  user: AuthUserDTO;
+  profile: SessionProfileDTO;
+}
+
+/**
+ * Response for password reset request
+ * POST /api/auth/reset-password response
+ */
+export interface ResetPasswordResponseDTO {
+  message: string;
+}
+
+/**
+ * Response for password update
+ * POST /api/auth/update-password response
+ */
+export interface UpdatePasswordResponseDTO {
+  message: string;
+}
+
+/**
+ * Response for resending verification email
+ * POST /api/auth/resend-verification response
+ */
+export interface ResendVerificationResponseDTO {
+  message: string;
 }
 
 /**

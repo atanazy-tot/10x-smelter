@@ -1,4 +1,4 @@
-export type AuthMode = "login" | "register";
+export type AuthMode = "login" | "register" | "reset" | "update" | "verify";
 
 export interface AuthFormError {
   code: string;
@@ -8,7 +8,9 @@ export interface AuthFormError {
 export interface AuthFormState {
   email: string;
   password: string;
+  confirmPassword: string;
   mode: AuthMode;
   isSubmitting: boolean;
   error: AuthFormError | null;
+  success: string | null;
 }
