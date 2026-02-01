@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Test coverage (generated)
+coverage/
+
+# Package lock files
+package-lock.json
+pnpm-lock.yaml
+
+# Database types (auto-generated)
+src/db/database.types.ts
