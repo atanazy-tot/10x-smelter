@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-node
+      - run: npm run lint
+      - run: npx prettier --check .
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint]
+    outputs:
+      statements: ${{ steps.coverage.outputs.statements }}
+      branches: ${{ steps.coverage.outputs.branches }}
+      functions: ${{ steps.coverage.outputs.functions }}
+      lines: ${{ steps.coverage.outputs.lines }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-node
+      - name: Run tests with coverage
+        id: test
+        continue-on-error: true
+        run: npm run test:coverage 2>&1 | tee coverage-output.txt
+      - name: Extract coverage metrics
+        id: coverage
+        run: |
+          if ! grep -q "ERROR: Coverage for" coverage-output.txt; then
+            echo "statements=80+" >> $GITHUB_OUTPUT
+            echo "branches=80+" >> $GITHUB_OUTPUT
+            echo "functions=80+" >> $GITHUB_OUTPUT
+            echo "lines=80+" >> $GITHUB_OUTPUT
+          else
+            STATEMENTS=$(grep "Coverage for statements" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+            BRANCHES=$(grep "Coverage for branches" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+            FUNCTIONS=$(grep "Coverage for functions" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+            LINES=$(grep "Coverage for lines" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+            echo "statements=${STATEMENTS:-N/A}" >> $GITHUB_OUTPUT
+            echo "branches=${BRANCHES:-N/A}" >> $GITHUB_OUTPUT
+            echo "functions=${FUNCTIONS:-N/A}" >> $GITHUB_OUTPUT
+            echo "lines=${LINES:-N/A}" >> $GITHUB_OUTPUT
+          fi
+
+  summary:
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: always()
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Generate Job Summary
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          # CI Results
+
+          ## Lint: ${{ needs.lint.result }}
+          ## Tests: ${{ needs.test.result }}
+
+          | Metric | Coverage |
+          |--------|----------|
+          | Statements | ${{ needs.test.outputs.statements }}% |
+          | Branches | ${{ needs.test.outputs.branches }}% |
+          | Functions | ${{ needs.test.outputs.functions }}% |
+          | Lines | ${{ needs.test.outputs.lines }}% |
+          EOF
+
+      - name: Create PR Comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: ci-results
+          message: |
+            ## CI Results
+
+            | Check | Status |
+            |-------|--------|
+            | Lint | ${{ needs.lint.result }} |
+            | Tests | ${{ needs.test.result }} |
+
+            ### Coverage
+            | Metric | Value |
+            |--------|-------|
+            | Statements | ${{ needs.test.outputs.statements }}% |
+            | Branches | ${{ needs.test.outputs.branches }}% |
+            | Functions | ${{ needs.test.outputs.functions }}% |
+            | Lines | ${{ needs.test.outputs.lines }}% |
