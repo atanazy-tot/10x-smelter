@@ -1,39 +1,18 @@
 /**
  * Prompt loader service.
- * Loads predefined prompts from markdown files and custom prompts from the database.
+ * Loads predefined prompts from the database and custom prompts from the prompts table.
  */
 
-import { promises as fs } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { DefaultPromptName } from "@/types";
 import { NotFoundError, InternalError } from "@/lib/utils/errors";
 
-// Cache for predefined prompts (loaded once, never changes)
-const promptCache = new Map<DefaultPromptName, string>();
-
-// Get the directory of this file for relative path resolution
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Path to predefined prompts directory
-const PREDEFINED_PROMPTS_DIR = join(__dirname, "../../prompts/predefined");
-
-/**
- * Maps DefaultPromptName enum values to file names.
- * Enum uses underscores (action_items) but files use the same.
- */
-const PROMPT_FILE_MAP: Record<DefaultPromptName, string> = {
-  summarize: "summarize.md",
-  action_items: "action_items.md",
-  detailed_notes: "detailed_notes.md",
-  qa_format: "qa_format.md",
-  table_of_contents: "table_of_contents.md",
-};
+// Cache for predefined prompts (keyed by prompt name)
+const promptCache = new Map<DefaultPromptName, { title: string; body: string }>();
 
 /**
  * Display names for prompts (for UI/logging).
+ * These are also stored in the database, but kept here for backwards compatibility.
  */
 export const PROMPT_DISPLAY_NAMES: Record<DefaultPromptName, string> = {
   summarize: "Summary",
@@ -44,31 +23,30 @@ export const PROMPT_DISPLAY_NAMES: Record<DefaultPromptName, string> = {
 };
 
 /**
- * Loads a predefined prompt by name.
+ * Loads a predefined prompt by name from the database.
  * Caches prompts in memory after first load.
  */
-export async function getPredefinedPrompt(name: DefaultPromptName): Promise<string> {
+export async function getPredefinedPrompt(supabase: SupabaseClient, name: DefaultPromptName): Promise<string> {
   // Check cache first
   const cached = promptCache.get(name);
   if (cached) {
-    return cached;
+    return cached.body;
   }
 
-  const filename = PROMPT_FILE_MAP[name];
-  if (!filename) {
-    throw new NotFoundError("prompt_not_found", `UNKNOWN PROMPT: ${name}`);
+  const { data, error } = await supabase.from("default_prompts").select("title, body").eq("name", name).maybeSingle();
+
+  if (error) {
+    console.error(`[PromptLoader] Database error loading predefined prompt ${name}:`, error);
+    throw new InternalError();
   }
 
-  const filePath = join(PREDEFINED_PROMPTS_DIR, filename);
-
-  try {
-    const content = await fs.readFile(filePath, "utf-8");
-    promptCache.set(name, content);
-    return content;
-  } catch (error) {
-    console.error(`[PromptLoader] Failed to load predefined prompt ${name}:`, error);
-    throw new NotFoundError("prompt_not_found", `PROMPT FILE NOT FOUND: ${name}`);
+  if (!data) {
+    throw new NotFoundError("prompt_not_found", `PREDEFINED PROMPT NOT FOUND: ${name}`);
   }
+
+  // Cache the result
+  promptCache.set(name, { title: data.title, body: data.body });
+  return data.body;
 }
 
 /**
@@ -102,7 +80,7 @@ export async function loadPrompts(
 
   // Load predefined prompts
   for (const name of defaultPromptNames) {
-    const content = await getPredefinedPrompt(name);
+    const content = await getPredefinedPrompt(supabase, name);
     prompts.push({
       name: PROMPT_DISPLAY_NAMES[name],
       content,
@@ -125,11 +103,23 @@ export async function loadPrompts(
  * Preloads all predefined prompts into cache.
  * Call this during server startup for faster first requests.
  */
-export async function preloadPredefinedPrompts(): Promise<void> {
-  const names: DefaultPromptName[] = ["summarize", "action_items", "detailed_notes", "qa_format", "table_of_contents"];
+export async function preloadPredefinedPrompts(supabase: SupabaseClient): Promise<void> {
+  const { data, error } = await supabase.from("default_prompts").select("name, title, body");
 
-  await Promise.all(names.map((name) => getPredefinedPrompt(name)));
-  console.log("[PromptLoader] Predefined prompts preloaded");
+  if (error) {
+    console.error("[PromptLoader] Failed to preload predefined prompts:", error);
+    return;
+  }
+
+  if (data) {
+    for (const prompt of data) {
+      promptCache.set(prompt.name as DefaultPromptName, {
+        title: prompt.title,
+        body: prompt.body,
+      });
+    }
+    console.log(`[PromptLoader] Predefined prompts preloaded (${data.length} prompts)`);
+  }
 }
 
 /**
@@ -140,4 +130,11 @@ export function getAvailablePredefinedPrompts(): { name: DefaultPromptName; disp
     name: name as DefaultPromptName,
     displayName,
   }));
+}
+
+/**
+ * Clears the prompt cache. Useful for testing or when prompts are updated.
+ */
+export function clearPromptCache(): void {
+  promptCache.clear();
 }

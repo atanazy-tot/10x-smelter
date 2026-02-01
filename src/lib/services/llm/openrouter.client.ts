@@ -206,13 +206,66 @@ export async function transcribeAudio(
   const apiKey = getApiKey(options.apiKey);
   const model = options.model ?? DEFAULT_TRANSCRIPTION_MODEL;
 
+  const transcriptionPrompt = `<role>
+You are an expert audio transcriptionist. Your task is to create an accurate, verbatim transcript of this audio recording.
+</role>
+
+<instructions>
+1. Transcribe ALL spoken words exactly as heard
+2. Preserve natural speech patterns: filler words (um, uh, like), false starts, self-corrections
+3. For multiple speakers, identify and label them consistently
+4. Use markdown formatting for readability
+</instructions>
+
+<speaker_detection>
+- If you detect multiple distinct voices, label them as **Speaker 1:**, **Speaker 2:**, etc.
+- If speakers introduce themselves by name, use their names: **John:**, **Sarah:**
+- Start a new paragraph for each speaker change
+- For single-speaker audio, do not add speaker labels
+</speaker_detection>
+
+<content_awareness>
+Adapt your transcription style based on content type:
+- MEETING: Capture all speakers, note crosstalk as [overlapping speech]
+- LECTURE: Preserve technical terms exactly, note [pause] for significant pauses
+- PODCAST: Label Host/Guest if distinguishable
+- INTERVIEW: Use Q:/A: format if clear interviewer/interviewee pattern
+- MONOLOGUE: Preserve thought progression and emphasis
+</content_awareness>
+
+<formatting>
+- Use proper paragraph breaks for topic shifts or speaker changes
+- Use *italics* for emphasized words (louder, stressed speech)
+- Use standard markers for non-verbal audio:
+  - [pause] - significant silence
+  - [laughter] - laughter
+  - [inaudible] - unclear speech that cannot be transcribed
+  - [crosstalk] - multiple people speaking simultaneously
+  - [background noise] - significant ambient sounds
+</formatting>
+
+<counterexamples>
+DO NOT:
+- Add timestamps (no "00:00:15" or "[00:15]")
+- Summarize or paraphrase - transcribe verbatim
+- Add your own commentary or analysis
+- "Clean up" grammar or speech patterns
+- Remove filler words or false starts
+- Invent words you cannot hear - use [inaudible] instead
+- Add section headers or titles
+</counterexamples>
+
+<output>
+Provide ONLY the transcript. No preamble, no summary, no commentary before or after.
+</output>`;
+
   const messages: Message[] = [
     {
       role: "user",
       content: [
         {
           type: "text",
-          text: `Transcribe this audio recording. Output ONLY the transcript text, with no additional commentary, labels, or formatting. Preserve the speaker's words exactly as spoken, including filler words, corrections, and natural speech patterns. If there are multiple speakers, indicate speaker changes with a simple line break.`,
+          text: transcriptionPrompt,
         },
         {
           type: "image_url",
