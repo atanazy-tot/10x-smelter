@@ -4,7 +4,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { deleteApiKey, getApiKeyStatus, validateAndStoreApiKey } from "@/lib/services/api-keys.service";
-import { ApiKeyInvalidError, ApiKeyQuotaExhaustedError, ApiKeyValidationFailedError, NoApiKeyError } from "@/lib/utils/api-key-errors";
+import {
+  ApiKeyInvalidError,
+  ApiKeyQuotaExhaustedError,
+  ApiKeyValidationFailedError,
+  NoApiKeyError,
+} from "@/lib/utils/api-key-errors";
 import { InternalError } from "@/lib/utils/errors";
 
 import { createMockSupabaseClient, type MockSupabaseClient } from "../../mocks/supabase";

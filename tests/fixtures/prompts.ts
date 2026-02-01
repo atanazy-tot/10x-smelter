@@ -95,7 +95,11 @@ export function createMockUnsectionedPrompts(options?: { userId?: string; count?
 /**
  * Creates multiple sections with prompts for pagination testing
  */
-export function createMockPromptStructure(options?: { userId?: string; sectionCount?: number; promptsPerSection?: number }) {
+export function createMockPromptStructure(options?: {
+  userId?: string;
+  sectionCount?: number;
+  promptsPerSection?: number;
+}) {
   const userId = options?.userId ?? faker.string.uuid();
   const sectionCount = options?.sectionCount ?? 3;
   const promptsPerSection = options?.promptsPerSection ?? 2;

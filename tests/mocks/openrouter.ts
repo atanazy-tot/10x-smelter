@@ -88,6 +88,7 @@ export function createMockFetch(options?: {
   shouldTimeout?: boolean;
   shouldNetworkError?: boolean;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return vi.fn().mockImplementation((url: string, _init?: RequestInit) => {
     // Handle network error
     if (options?.shouldNetworkError) {

@@ -9,7 +9,12 @@ import { SmeltNotFoundError, SmeltPromptNotFoundError, SmeltValidationError } fr
 
 import { createMockSupabaseClient, type MockSupabaseClient } from "../../mocks/supabase";
 import { createMockAudioFile, createMockAudioFiles } from "../../mocks/file";
-import { createMockSmelt, createMockSmeltFile, createMockCompletedSmelt, createMockSmeltList } from "../../fixtures/smelts";
+import {
+  createMockSmelt,
+  createMockSmeltFile,
+  createMockCompletedSmelt,
+  createMockSmeltList,
+} from "../../fixtures/smelts";
 import { TEST_USER_IDS } from "../../fixtures/users";
 
 // Mock usage service
@@ -70,9 +75,9 @@ describe("smelts.service", () => {
       it("should throw SmeltValidationError for combine mode without auth", async () => {
         const files = createMockAudioFiles(2);
 
-        await expect(
-          createSmelt(mockSupabase as never, null, files, { mode: "combine" }, "127.0.0.1")
-        ).rejects.toThrow(SmeltValidationError);
+        await expect(createSmelt(mockSupabase as never, null, files, { mode: "combine" }, "127.0.0.1")).rejects.toThrow(
+          SmeltValidationError
+        );
 
         try {
           await createSmelt(mockSupabase as never, null, files, { mode: "combine" }, "127.0.0.1");
@@ -89,7 +94,13 @@ describe("smelts.service", () => {
         ).rejects.toThrow(SmeltValidationError);
 
         try {
-          await createSmelt(mockSupabase as never, TEST_USER_IDS.authenticated, files, { mode: "combine" }, "127.0.0.1");
+          await createSmelt(
+            mockSupabase as never,
+            TEST_USER_IDS.authenticated,
+            files,
+            { mode: "combine" },
+            "127.0.0.1"
+          );
         } catch (error) {
           expect((error as SmeltValidationError).code).toBe("combine_requires_multiple");
         }
@@ -100,7 +111,9 @@ describe("smelts.service", () => {
       it("should throw UnauthorizedError for anonymous with multiple files", async () => {
         const files = createMockAudioFiles(2);
 
-        await expect(createSmelt(mockSupabase as never, null, files, {}, "127.0.0.1")).rejects.toThrow(UnauthorizedError);
+        await expect(createSmelt(mockSupabase as never, null, files, {}, "127.0.0.1")).rejects.toThrow(
+          UnauthorizedError
+        );
       });
 
       it("should throw UnauthorizedError for anonymous with user_prompt_id", async () => {
@@ -153,7 +166,8 @@ describe("smelts.service", () => {
 
       it("should verify custom prompt ownership", async () => {
         const files = [createMockAudioFile()];
-        const mockSmelt = createMockSmelt({ user_id: TEST_USER_IDS.authenticated });
+        // Smelt creation context - ownership verification happens at prompt level
+        createMockSmelt({ user_id: TEST_USER_IDS.authenticated });
 
         // Mock prompt not found
         const promptSelectMock = vi.fn().mockReturnValue({

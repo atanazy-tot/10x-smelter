@@ -252,6 +252,7 @@ describe("validateAudioFile", () => {
       ["mp3", "audio/mpeg"],
       ["wav", "audio/wav"],
       ["m4a", "audio/m4a"],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ])("should accept valid %s file", (ext, _mime) => {
       const file = createMockAudioFile({ format: ext as "mp3" | "wav" | "m4a" });
       expect(() => validateAudioFile(file)).not.toThrow();

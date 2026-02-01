@@ -18,7 +18,13 @@ import {
 } from "@/lib/services/audio/validation";
 import { CorruptedFileError, DurationExceededError, FileTooLargeError, InvalidFormatError } from "@/lib/utils/errors";
 
-import { createEmptyFile, createMockAudioFile, createOversizedFile, createUnsupportedFile, createGenericMimeFile } from "../../../mocks/file";
+import {
+  createEmptyFile,
+  createMockAudioFile,
+  createOversizedFile,
+  createUnsupportedFile,
+  createGenericMimeFile,
+} from "../../../mocks/file";
 
 describe("validateFormat", () => {
   describe("valid MIME types", () => {

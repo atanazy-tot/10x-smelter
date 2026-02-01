@@ -169,6 +169,7 @@ export function createMockSupabaseClient(options?: {
   });
 
   // Create a simpler RPC mock that just returns the response directly
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const simpleRpcMock = vi.fn((fn: string, _params?: Record<string, unknown>) => {
     const response = rpcResponses[fn] ?? { data: null, error: null };
     return Promise.resolve(response);

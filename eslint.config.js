@@ -18,8 +18,17 @@ const gitignorePath = path.resolve(__dirname, ".gitignore");
 const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
   rules: {
-    "no-console": "warn",
+    // Allow console.error and console.warn, but warn on console.log
+    "no-console": ["warn", { allow: ["error", "warn"] }],
     "no-unused-vars": "off",
+  },
+});
+
+// Allow console in server-side code (services, API routes, middleware, realtime)
+const serverSideConfig = tseslint.config({
+  files: ["src/lib/**/*.ts", "src/pages/api/**/*.ts", "src/middleware/**/*.ts"],
+  rules: {
+    "no-console": "off",
   },
 });
 
@@ -59,6 +68,7 @@ const reactConfig = tseslint.config({
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
+  serverSideConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],

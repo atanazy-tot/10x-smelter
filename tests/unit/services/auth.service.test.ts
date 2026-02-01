@@ -65,7 +65,9 @@ describe("auth.service", () => {
         error: { message: "Rate limit exceeded", code: "rate_limit" },
       });
 
-      await expect(register(mockSupabase as never, "test@example.com", "password123")).rejects.toThrow(RateLimitedError);
+      await expect(register(mockSupabase as never, "test@example.com", "password123")).rejects.toThrow(
+        RateLimitedError
+      );
     });
 
     it("should throw InternalError when user data is missing", async () => {

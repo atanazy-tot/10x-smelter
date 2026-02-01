@@ -9,10 +9,10 @@ interface FfprobeData {
     size?: number;
     format_name?: string;
   };
-  streams: Array<{
+  streams: {
     codec_type: string;
     codec_name?: string;
-  }>;
+  }[];
 }
 
 /**
@@ -36,11 +36,7 @@ export function createMockFfmpegCommand(options?: {
     outputOptions: vi.fn().mockReturnThis(),
     pipe: vi.fn().mockReturnThis(),
     run: vi.fn().mockReturnThis(),
-    on: vi.fn().mockImplementation(function (
-      this: typeof command,
-      event: string,
-      callback: (arg?: unknown) => void
-    ) {
+    on: vi.fn().mockImplementation(function (this: typeof command, event: string, callback: (arg?: unknown) => void) {
       if (event === "end" && !options?.shouldFail) {
         setTimeout(() => callback(), 0);
       }
